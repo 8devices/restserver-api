@@ -127,7 +127,7 @@ class ClientNodeInstance {
   requestGet(response, addressArray, observation) {
     const objectInstance = addressArray.slice(0, 2).join('/');
     response._packet.ack = true;
-    
+
     switch (addressArray.length) {
       case 1: {
         // TODO: Add handlers for objects reading
