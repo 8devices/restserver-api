@@ -322,7 +322,6 @@ class ClientNodeInstance {
 
   stopObservation(addressArray) {
     const objectInstance = addressArray.slice(0, 2).join('/');
-    let unobserveResources = [];
     switch (addressArray.length) {
       case 1: {
         // TODO: Add handlers for objects observation cancelling
