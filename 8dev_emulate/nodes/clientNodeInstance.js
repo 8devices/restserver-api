@@ -281,9 +281,7 @@ class ClientNodeInstance {
   }
 
   startObservation(addressArray, notification) {
-    const observationTime = new Date().getTime()
     const objectInstance = addressArray.slice(0, 2).join('/');
-    let observeResources = [];
     notification._packet.ack = false;
     notification._packet.confirmable = true;
 
@@ -298,20 +296,17 @@ class ClientNodeInstance {
       } 
       case 3: {
         if (this.observedResources[addressArray.join('/')] === undefined) {
-          const iterator = new Interval(() => {
+          this.observedResources[addressArray.join('/')] = new Interval(() => {
             this.objects[objectInstance].resources[addressArray[2]].getTLVBuffer((buffer) => {
-              let currentTime = (new Date().getTime()) - observationTime;
-              notification.setOption('Observe', currentTime);
               notification.write(buffer);
             });
           }, this.objects['1/0'].getResourceValue('3') * 1000 );
-          const observation = this.objects[objectInstance].resources[addressArray[2]].on('change', () => {
+          this.objects[objectInstance].resources[addressArray[2]].on('change', () => {
             // TODO: Implement minimum period of observation
-            iterator.skip();
+            if (this.observedResources[addressArray.join('/')] instanceof Interval) {
+              this.observedResources[addressArray.join('/')].skip();
+            }
           });
-          this.observedResources[addressArray.join('/')] = {
-            'observationTime': observationTime,
-          };
         }
         break;
       }
