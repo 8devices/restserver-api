@@ -325,31 +325,24 @@ class ClientNodeInstance {
     let unobserveResources = [];
     switch (addressArray.length) {
       case 1: {
-        // TODO: Add handlers for objects observation
+        // TODO: Add handlers for objects observation cancelling
         break;
       } 
       case 2: {
-        // TODO: Add handlers for object instances observation
+        // TODO: Add handlers for object instances observation cancelling
         break;
       } 
       case 3: {
-        // TODO: Add handlers for resources observation
-        unobserveResources.push(this.objects[objcestInstance].resources[addressArray[2]])
         delete this.observedResources[addressArray.join('/')];
         break;
       } 
       case 4: {
-        // TODO: Add handlers for resource instances observation
+        // TODO: Add handlers for resource instances observation cancelling
         break;
       }
       default: {
-        // TODO: Handle bad observation requests
+        // TODO: Handle bad observation cancelling requests
       }
-    }
-    for (let i = 0; i < unobserveResources.length; i += 1) {
-      resource.observe('value', (changes) => {
-        return resource.value;
-      });
     }
   }
 
