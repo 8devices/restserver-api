@@ -442,7 +442,7 @@ class ClientNodeInstance extends EventEmitter {
           break;
         }
         default: {
-          this.emit('error', 'Unknown sensor state:', state);
+          this.emit('deregister');
         }
       }
     });
