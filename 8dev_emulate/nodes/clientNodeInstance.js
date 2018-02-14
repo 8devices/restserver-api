@@ -303,6 +303,13 @@ class ClientNodeInstance extends EventEmitter {
     notification._packet.ack = false;
     notification._packet.confirmable = true;
 
+    notification.on('error', (error) => {
+      // TODO: Find better way to handle notification timeouts
+      if (this.observedResources[addressArray.join('/')] !== undefined) {
+        this.stopObservation(addressArray);
+      }
+    })
+
     switch (addressArray.length) {
       case 1: {
         // TODO: Add handlers for objects observation
