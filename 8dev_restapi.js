@@ -37,6 +37,26 @@ class Endpoint extends EventEmitter {
     });
   }
 
+  read(path, callback) {
+    const pathArray = path.split('/');
+    const headers = {
+      'Uri-Path:': pathArray[1],
+      'Uri-Path:': pathArray[2],
+      'Uri-Path:': pathArray[3],
+      'Content-Type': 'application/vnd.oma.lwm2m+tlv',
+    };
+
+    this.service.get('/endpoints/' + this.id + path, (data, resp) => {
+      callback(resp.statusCode, data);
+    }, headers);
+  }
+
+  write(path, callback, tlvBuffer) {
+    this.service.put('/endpoints/' + this.id + path, (data, resp) => {
+      callback(resp.statusCode);
+    }, tlvBuffer);
+  }
+
   observe(path, callback) {
     return new Promise((fulfill, reject) => {
       this.service.put('/subscriptions/' + this.id + path, (data, resp) => {
@@ -58,6 +78,7 @@ class Service extends EventEmitter {
     this.config = opts;
     this.client = new Client(); 
     this.endpoints = [];
+    this.addTlvSerializer();
 
     this.pollTimer = setInterval(() => {
       this.client.get(this.config['host'] + '/notification/pull', (data, resp) => {
@@ -66,14 +87,34 @@ class Service extends EventEmitter {
     }, 1234);
   }
 
-  get(path, callback) {
+  addTlvSerializer() {
+    this.client.serializers.add({
+      name: 'buffer-serializer',
+      isDefault: false,
+      match: (request) => {
+        return request.headers["Content-Type"] === "application/vnd.oma.lwm2m+tlv";
+      },
+      serialize: (data, nrcEventEmitter, serializedCallback) => {
+        if (data instanceof Buffer) {
+          nrcEventEmitter('serialized', data);
+          serializedCallback(data);
+        }
+      },
+    });
+  }
+
+  get(path, callback, packetHeaders) {
+    let args = {
+      headers: packetHeaders,
+    };
     let url = this.config['host'] + path;
     this.client.get(url, callback);
   }
 
-  put(path, callback, data) {
+  put(path, callback, tlvBuffer) {
     let args = {
-      data: data
+      headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
+      data: tlvBuffer
     };
     let url = this.config['host'] + path;
     this.client.put(url, args, callback);
