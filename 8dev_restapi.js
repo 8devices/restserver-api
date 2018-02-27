@@ -38,17 +38,21 @@ class Endpoint extends EventEmitter {
   }
 
   read(path, callback) {
-    const pathArray = path.split('/');
-    const headers = {
-      'Uri-Path:': pathArray[1],
-      'Uri-Path:': pathArray[2],
-      'Uri-Path:': pathArray[3],
-      'Content-Type': 'application/vnd.oma.lwm2m+tlv',
-    };
-
-    this.service.get('/endpoints/' + this.id + path, (data, resp) => {
-      callback(resp.statusCode, data);
-    }, headers);
+    return new Promise((fulfill, reject) => {
+      this.service.get('/endpoints/' + this.id + path, (data, resp) => {
+        if (resp.statusCode === 202) {
+          this.service.on('async-response', (asyncResponse) => {
+            if (data['async-response-id'] === asyncResponse['id']) {
+              callback(asyncResponse.payload);
+            }
+          });
+          let id = data['async-response-id'];
+          fulfill(id);
+        } else {
+          reject(resp.statusCode);
+        }
+      });
+    });
   }
 
   write(path, callback, tlvBuffer) {
@@ -92,7 +96,7 @@ class Service extends EventEmitter {
       name: 'buffer-serializer',
       isDefault: false,
       match: (request) => {
-        return request.headers["Content-Type"] === "application/vnd.oma.lwm2m+tlv";
+        return request.headers['Content-Type'] === 'application/vnd.oma.lwm2m+tlv';
       },
       serialize: (data, nrcEventEmitter, serializedCallback) => {
         if (data instanceof Buffer) {
@@ -103,12 +107,13 @@ class Service extends EventEmitter {
     });
   }
 
-  get(path, callback, packetHeaders) {
+  get(path, callback) {
     let args = {
-      headers: packetHeaders,
+      headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
     };
     let url = this.config['host'] + path;
-    this.client.get(url, callback);
+    // this.client.get(url, callback);
+    this.client.get(url, args, callback);
   }
 
   put(path, callback, tlvBuffer) {
