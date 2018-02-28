@@ -43,7 +43,7 @@ class Endpoint extends EventEmitter {
         if (resp.statusCode === 202) {
           this.service.on('async-response', (asyncResponse) => {
             if (data['async-response-id'] === asyncResponse['id']) {
-              callback(asyncResponse.payload);
+              callback(asyncResponse.status, asyncResponse.payload);
             }
           });
           let id = data['async-response-id'];
