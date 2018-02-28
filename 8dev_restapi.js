@@ -124,7 +124,6 @@ class Service extends EventEmitter {
       headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
     };
     let url = this.config['host'] + path;
-    // this.client.get(url, callback);
     this.client.get(url, args, callback);
   }
 
