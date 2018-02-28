@@ -56,9 +56,21 @@ class Endpoint extends EventEmitter {
   }
 
   write(path, callback, tlvBuffer) {
-    this.service.put('/endpoints/' + this.id + path, (data, resp) => {
-      callback(resp.statusCode);
-    }, tlvBuffer);
+    return new Promise((fulfill, reject) => {
+      this.service.put('/endpoints/' + this.id + path, (data, resp) => {
+        if (resp.statusCode === 202) {
+          this.service.on('async-response', (asyncResponse) => {
+            if (data['async-response-id'] === asyncResponse['id']) {
+              callback(asyncResponse.status, asyncResponse.payload);
+            }
+          });
+          let id = data['async-response-id'];
+          fulfill(id);
+        } else {
+          reject(resp.statusCode);
+        }
+      }, tlvBuffer);
+    });
   }
 
   observe(path, callback) {
