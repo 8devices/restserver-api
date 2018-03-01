@@ -97,8 +97,12 @@ class Service extends EventEmitter {
     this.addTlvSerializer();
 
     this.pollTimer = setInterval(() => {
-      this.client.get(this.config['host'] + '/notification/pull', (data, resp) => {
+      const status = this.client.get(this.config['host'] + '/notification/pull', (data, resp) => {
+		this.ServerStatus = true;
         this._processEvents(data);
+      });
+      status.on('error', (err) => {
+        this.emit('server-error', err);
       });
     }, 1234);
   }
@@ -124,7 +128,10 @@ class Service extends EventEmitter {
       headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
     };
     let url = this.config['host'] + path;
-    this.client.get(url, args, callback);
+    const status = this.client.get(url, args, callback);
+    status.on('error', (err) => {
+        this.emit('server-error', err);
+    });
   }
 
   put(path, callback, tlvBuffer) {
@@ -133,7 +140,10 @@ class Service extends EventEmitter {
       data: tlvBuffer
     };
     let url = this.config['host'] + path;
-    this.client.put(url, args, callback);
+    const status = this.client.put(url, args, callback);
+    status.on('error', (err) => {
+        this.emit('server-error', err);
+    });
   }
 
   _processEvents(events) {
