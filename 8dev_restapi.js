@@ -93,7 +93,7 @@ class Endpoint extends EventEmitter {
         } else {
           reject(resp.statusCode);
         }
-      })
+      });
     });
   }
 
