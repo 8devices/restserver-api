@@ -27,19 +27,21 @@ class Endpoint extends EventEmitter {
 
   getObjects() {
     return new Promise((fulfill, reject) => {
-      this.service.get('/endpoints/' + this.id, (data, resp) => {
+      this.service.get('/endpoints/' + this.id).then((data, resp) => {
         if (resp.statusCode == 200) {
           fulfill(data);
         } else {
           reject(resp.statusCode);
         }
+      }).catch((err) => {
+          reject(err);
       });
     });
   }
 
   read(path, callback) {
     return new Promise((fulfill, reject) => {
-      this.service.get('/endpoints/' + this.id + path, (data, resp) => {
+      this.service.get('/endpoints/' + this.id + path).then((data, resp) => {
         if (resp.statusCode === 202) {
           this.service.on('async-response', (asyncResponse) => {
             if (data['async-response-id'] === asyncResponse['id']) {
@@ -51,13 +53,15 @@ class Endpoint extends EventEmitter {
         } else {
           reject(resp.statusCode);
         }
+      }).catch((err) => {
+          reject(err);
       });
     });
   }
 
   write(path, callback, tlvBuffer) {
     return new Promise((fulfill, reject) => {
-      this.service.put('/endpoints/' + this.id + path, (data, resp) => {
+      this.service.put('/endpoints/' + this.id + path, tlvBuffer).then((data, resp) => {
         if (resp.statusCode === 202) {
           this.service.on('async-response', (asyncResponse) => {
             if (data['async-response-id'] === asyncResponse['id']) {
@@ -69,13 +73,15 @@ class Endpoint extends EventEmitter {
         } else {
           reject(resp.statusCode);
         }
-      }, tlvBuffer);
+      }).catch((err) => {
+          reject(err);
+      });
     });
   }
 
   observe(path, callback) {
     return new Promise((fulfill, reject) => {
-      this.service.put('/subscriptions/' + this.id + path, (data, resp) => {
+      this.service.put('/subscriptions/' + this.id + path).then((data, resp) => {
         if (resp.statusCode === 202) {
           let id = data['async-response-id'];
           this.observations[id] = callback;
@@ -83,6 +89,8 @@ class Endpoint extends EventEmitter {
         } else {
           reject(resp.statusCode);
         }
+      }).catch((err) => {
+          reject(err);
       });
     });
   }
@@ -97,12 +105,10 @@ class Service extends EventEmitter {
     this.addTlvSerializer();
 
     this.pollTimer = setInterval(() => {
-      const status = this.client.get(this.config['host'] + '/notification/pull', (data, resp) => {
-		this.ServerStatus = true;
+      const status = this.get(this.config['host'] + '/notification/pull').then((data, resp) => {
         this._processEvents(data);
-      });
-      status.on('error', (err) => {
-        this.emit('server-error', err);
+      }).catch((err) => {
+          // ???
       });
     }, 1234);
   }
@@ -123,26 +129,34 @@ class Service extends EventEmitter {
     });
   }
 
-  get(path, callback) {
-    let args = {
-      headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
-    };
-    let url = this.config['host'] + path;
-    const status = this.client.get(url, args, callback);
-    status.on('error', (err) => {
-        this.emit('server-error', err);
+  get(path) {
+    return new Promise((fulfill, reject) => {
+      let args = {
+        headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
+      };
+      let url = this.config['host'] + path;
+      const getRequest = this.client.get(url, args, (data, resp) => {
+          fulfill(data, resp);
+      });
+      GetRequest.on('error', (err) => {
+        reject(err);
+      });
     });
   }
 
-  put(path, callback, tlvBuffer) {
-    let args = {
-      headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
-      data: tlvBuffer
-    };
-    let url = this.config['host'] + path;
-    const status = this.client.put(url, args, callback);
-    status.on('error', (err) => {
-        this.emit('server-error', err);
+  put(path, tlvBuffer) {
+    return new Promise((fulfill, reject) => {
+      let args = {
+        headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
+        data: tlvBuffer
+      };
+      let url = this.config['host'] + path;
+      const putRequest = this.client.put(url, args, (data, resp) => {
+          fulfill(data, resp);
+      });
+      putRequest.on('error', (err) => {
+        reject(err);
+      });
     });
   }
 
