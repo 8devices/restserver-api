@@ -42,13 +42,13 @@ class Endpoint extends EventEmitter {
   read(path, callback) {
     return new Promise((fulfill, reject) => {
       this.service.get('/endpoints/' + this.id + path).then((data, resp) => {
+        const id = data['async-response-id'];
         if (resp.statusCode === 202) {
           this.service.on('async-response', (asyncResponse) => {
-            if (data['async-response-id'] === asyncResponse['id']) {
+            if (id === asyncResponse['id']) {
               callback(asyncResponse.status, asyncResponse.payload);
             }
           });
-          let id = data['async-response-id'];
           fulfill(id);
         } else {
           reject(resp.statusCode);
@@ -62,6 +62,26 @@ class Endpoint extends EventEmitter {
   write(path, callback, tlvBuffer) {
     return new Promise((fulfill, reject) => {
       this.service.put('/endpoints/' + this.id + path, tlvBuffer).then((data, resp) => {
+        const id = data['async-response-id'];
+        if (resp.statusCode === 202) {
+          this.service.on('async-response', (asyncResponse) => {
+            if (id === asyncResponse['id']) {
+              callback(asyncResponse.status, asyncResponse.payload);
+            }
+          });
+          fulfill(id);
+        } else {
+          reject(resp.statusCode);
+        }
+      }).catch((err) => {
+          reject(err);
+      });
+    });
+  }
+
+  execute(path, callback) {
+    return new Promise((fulfill, reject) => {
+      this.service.post('/endpoints/' + this.id + path, (data, resp) => {
         if (resp.statusCode === 202) {
           this.service.on('async-response', (asyncResponse) => {
             if (data['async-response-id'] === asyncResponse['id']) {
@@ -73,9 +93,7 @@ class Endpoint extends EventEmitter {
         } else {
           reject(resp.statusCode);
         }
-      }).catch((err) => {
-          reject(err);
-      });
+      })
     });
   }
 
@@ -158,6 +176,14 @@ class Service extends EventEmitter {
         reject(err);
       });
     });
+  }
+
+  post(path, callback) {
+    let args = {
+      headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
+    };
+    let url = this.config['host'] + path;
+    this.client.post(url, args, callback);
   }
 
   _processEvents(events) {

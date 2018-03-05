@@ -35,7 +35,8 @@ function Interval(callback, delay) {
   }
 
   this.skip = function(newDelay) {
-    return this.reset(newDelay);
+    callback();
+    return this.reset();
   }
 }
 
@@ -140,8 +141,8 @@ class ClientNodeInstance extends EventEmitter {
     // Binding
     this.objects['1/0'].addResource(7, 'RW', RESOURCE_TYPE.STRING, bindingMode);
     // Registration Update Trigger
-    // this.objects['1/0'].addResource(8, 'E', RESOURCE_TYPE.NONE, () => {
-    // });
+    this.objects['1/0'].addResource(8, 'E', RESOURCE_TYPE.NONE, () => {
+    });
   }
 
   initiateAccessControlObject() {
@@ -247,7 +248,34 @@ class ClientNodeInstance extends EventEmitter {
   }
 
   requestPost(response, addressArray) {
-    // TODO: Add handlers for resource execution
+    const objectInstance = addressArray.slice(0, 2).join('/');
+    response._packet.ack = true;
+
+    switch (addressArray.length) {
+      case 1: {
+        response.statusCode = '4.04';
+        break;
+      }
+      case 2: {
+        response.statusCode = '4.04';
+        break;
+      }
+      case 3: {
+        if (this.objects[objectInstance] instanceof ObjectInstance) {
+          response.statusCode = this.objects[objectInstance].executeResource(addressArray[2]);
+        } else {
+          response.statusCode = '4.04';
+        }
+        break;
+      }
+      case 4: {
+        response.statusCode = '4.04';
+        break;
+      }
+      default: {
+        response.statusCode = '4.04';
+      }
+    }
     response.end()
   }
 
@@ -349,18 +377,14 @@ class ClientNodeInstance extends EventEmitter {
         break;
       } 
       case 3: {
-        if (this.observedResources[addressArray.join('/')] === undefined) {
+        if (this.observedResources[addressArray.join('/')] === undefined &&
+          this.objects[objectInstance] instanceof ObjectInstance) {
           this.observedResources[addressArray.join('/')] = new Interval(() => {
             this.objects[objectInstance].resources[addressArray[2]].getTLVBuffer((buffer) => {
               notification.write(buffer);
             });
           }, this.objects['1/0'].getResourceValue('3') * 1000 );
-
-          this.objects['1/0'].resources['3'].on('change', (newPeriod) => {
-            this.observedResources[addressArray.join('/')].reset(newPeriod * 1000);
-          });
-
-          if (this.objects[objectInstance].resources[addressArray[2]].notifyOnCHange) {
+          if (this.objects[objectInstance].resources[addressArray[2]].notifyOnChange) {
             this.objects[objectInstance].resources[addressArray[2]].on('change', () => {
               // TODO: Implement minimum period of observation
               if (this.observedResources[addressArray.join('/')] instanceof Interval) {
