@@ -27,11 +27,11 @@ class Endpoint extends EventEmitter {
 
   getObjects() {
     return new Promise((fulfill, reject) => {
-      this.service.get('/endpoints/' + this.id).then((data, resp) => {
-        if (resp.statusCode == 200) {
+      this.service.get('/endpoints/' + this.id).then((dataAndResponse) => {
+        if (dataAndResponse.resp.statusCode == 200) {
           fulfill(data);
         } else {
-          reject(resp.statusCode);
+          reject(dataAndResponse.resp.statusCode);
         }
       }).catch((err) => {
           reject(err);
@@ -41,9 +41,9 @@ class Endpoint extends EventEmitter {
 
   read(path, callback) {
     return new Promise((fulfill, reject) => {
-      this.service.get('/endpoints/' + this.id + path).then((data, resp) => {
+      this.service.get('/endpoints/' + this.id + path).then((dataAndResponse) => {
         const id = data['async-response-id'];
-        if (resp.statusCode === 202) {
+        if (dataAndResponse.resp.statusCode === 202) {
           this.service.on('async-response', (asyncResponse) => {
             if (id === asyncResponse['id']) {
               callback(asyncResponse.status, asyncResponse.payload);
@@ -51,7 +51,7 @@ class Endpoint extends EventEmitter {
           });
           fulfill(id);
         } else {
-          reject(resp.statusCode);
+          reject(dataAndResponse.resp.statusCode);
         }
       }).catch((err) => {
           reject(err);
@@ -61,9 +61,9 @@ class Endpoint extends EventEmitter {
 
   write(path, callback, tlvBuffer) {
     return new Promise((fulfill, reject) => {
-      this.service.put('/endpoints/' + this.id + path, tlvBuffer).then((data, resp) => {
+      this.service.put('/endpoints/' + this.id + path, tlvBuffer).then((dataAndResponse) => {
         const id = data['async-response-id'];
-        if (resp.statusCode === 202) {
+        if (dataAndResponse.resp.statusCode === 202) {
           this.service.on('async-response', (asyncResponse) => {
             if (id === asyncResponse['id']) {
               callback(asyncResponse.status, asyncResponse.payload);
@@ -71,7 +71,7 @@ class Endpoint extends EventEmitter {
           });
           fulfill(id);
         } else {
-          reject(resp.statusCode);
+          reject(dataAndResponse.resp.statusCode);
         }
       }).catch((err) => {
           reject(err);
@@ -81,8 +81,8 @@ class Endpoint extends EventEmitter {
 
   execute(path, callback) {
     return new Promise((fulfill, reject) => {
-      this.service.post('/endpoints/' + this.id + path, (data, resp) => {
-        if (resp.statusCode === 202) {
+      this.service.post('/endpoints/' + this.id + path).then((dataAndResponse) => {
+        if (dataAndResponse.resp.statusCode === 202) {
           this.service.on('async-response', (asyncResponse) => {
             if (data['async-response-id'] === asyncResponse['id']) {
               callback(asyncResponse.status, asyncResponse.payload);
@@ -91,21 +91,23 @@ class Endpoint extends EventEmitter {
           let id = data['async-response-id'];
           fulfill(id);
         } else {
-          reject(resp.statusCode);
+          reject(dataAndResponse.resp.statusCode);
         }
+      }).catch((err) => {
+          reject(err);
       });
     });
   }
 
   observe(path, callback) {
     return new Promise((fulfill, reject) => {
-      this.service.put('/subscriptions/' + this.id + path).then((data, resp) => {
-        if (resp.statusCode === 202) {
+      this.service.put('/subscriptions/' + this.id + path).then((dataAndResponse) => {
+        if (dataAndResponse.resp.statusCode === 202) {
           let id = data['async-response-id'];
           this.observations[id] = callback;
           fulfill(id);
         } else {
-          reject(resp.statusCode);
+          reject(dataAndResponse.resp.statusCode);
         }
       }).catch((err) => {
           reject(err);
@@ -123,11 +125,9 @@ class Service extends EventEmitter {
     this.addTlvSerializer();
 
     this.pollTimer = setInterval(() => {
-      const status = this.get(this.config['host'] + '/notification/pull').then((data, resp) => {
-        this._processEvents(data);
-      }).catch((err) => {
-          // ???
-      });
+      this.get(this.config['host'] + '/notification/pull').then((dataAndResponse) => {
+        this._processEvents(dataAndResponse.data);
+      }).catch(() => {});
     }, 1234);
   }
 
@@ -154,9 +154,12 @@ class Service extends EventEmitter {
       };
       let url = this.config['host'] + path;
       const getRequest = this.client.get(url, args, (data, resp) => {
-          fulfill(data, resp);
+        const dataAndResponse = {};
+        dataAndResponse.data = data;
+        dataAndResponse.resp = resp;
+        fulfill(dataAndResponse);
       });
-      GetRequest.on('error', (err) => {
+      getRequest.on('error', (err) => {
         reject(err);
       });
     });
@@ -170,7 +173,10 @@ class Service extends EventEmitter {
       };
       let url = this.config['host'] + path;
       const putRequest = this.client.put(url, args, (data, resp) => {
-          fulfill(data, resp);
+        const dataAndResponse = {};
+        dataAndResponse.data = data;
+        dataAndResponse.resp = resp;
+        fulfill(dataAndResponse);
       });
       putRequest.on('error', (err) => {
         reject(err);
@@ -178,12 +184,22 @@ class Service extends EventEmitter {
     });
   }
 
-  post(path, callback) {
-    let args = {
-      headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
-    };
-    let url = this.config['host'] + path;
-    this.client.post(url, args, callback);
+  post(path) {
+    return new Promise((fulfill, reject) => {
+      let args = {
+        headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
+      };
+      let url = this.config['host'] + path;
+      const postRequest = this.client.post(url, args, (data, resp) => {
+        const dataAndResponse = {};
+        dataAndResponse.data = data;
+        dataAndResponse.resp = resp;
+        fulfill(dataAndResponse);
+      });
+      postRequest.on('error', (err) => {
+        reject(err);
+      });
+    });
   }
 
   _processEvents(events) {
