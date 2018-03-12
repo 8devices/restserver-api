@@ -29,7 +29,7 @@ class Resource extends EventEmitter {
 }
 
 class ResourceInstance extends EventEmitter {
-  constructor(identifier, permissions, type, value = undefined, handler = undefined, notifyOnChange = false) {
+  constructor(identifier, permissions, type, value = undefined, handler = undefined, notifyOnChange = true) {
     super();
 
     this.identifier = identifier;
@@ -47,7 +47,6 @@ class ResourceInstance extends EventEmitter {
 
   set value(value) {
     // TODO: throw exception if value type is incorrect
-
     if (this._value != value) {
       this._value = value;
       this.emit('change', value);
