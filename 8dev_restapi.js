@@ -123,7 +123,6 @@ class Service extends EventEmitter {
     this.client = new Client(); 
     this.endpoints = [];
     this.addTlvSerializer();
-    this.start();
   }
 
   start(interval = 1234) {
