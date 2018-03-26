@@ -123,14 +123,21 @@ class Service extends EventEmitter {
     this.client = new Client(); 
     this.endpoints = [];
     this.addTlvSerializer();
+    this.start();
+  }
 
+  start(interval = 1234) {
     this.pollTimer = setInterval(() => {
       this.get('/notification/pull').then((dataAndResponse) => {
         this._processEvents(dataAndResponse.data);
       }).catch(err => {
         console.error('Failed to pull notifications!');
       });
-    }, 1234);
+    }, interval);
+  }
+
+  stop() {
+    clearInterval(this.pollTimer);
   }
 
   addTlvSerializer() {
