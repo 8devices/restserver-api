@@ -6,7 +6,6 @@ const response = require('./rest-response');
 const restAPI = require('../8dev_restapi.js');
 
 describe('Rest API interface', () => {
-  chai.should();
   const url = 'http://localhost:8888';
   const deviceName = 'threeSeven';
   const path = '/3312/0/5850';
@@ -22,8 +21,8 @@ describe('Rest API interface', () => {
           .reply(200, response.sensorObjects);
         return device.getObjects().then((resp) => {
           expect(typeof resp).to.equal('object');
-          resp.should.be.a('array');
-          resp[0].should.have.property('uri');
+          expect(resp).to.be.a('array');
+          expect(resp[0]).to.have.property('uri');
         });
       });
 
@@ -45,7 +44,7 @@ describe('Rest API interface', () => {
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.read(path).then((resp) => {
           expect(typeof resp).to.equal('string');
-          resp.should.match(idRegex);
+          expect(resp).to.match(idRegex);
         });
       });
 
@@ -67,7 +66,7 @@ describe('Rest API interface', () => {
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.write(path, () => {}, tlvBuffer).then((resp) => {
           expect(typeof resp).to.equal('string');
-          resp.should.match(idRegex);
+          expect(resp).to.match(idRegex);
         });
       });
 
@@ -89,7 +88,7 @@ describe('Rest API interface', () => {
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.execute(path).then((resp) => {
           expect(typeof resp).to.equal('string');
-          resp.should.match(idRegex);
+          expect(resp).to.match(idRegex);
         });
       });
 
@@ -111,7 +110,7 @@ describe('Rest API interface', () => {
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.observe(path).then((resp) => {
           expect(typeof resp).to.equal('string');
-          resp.should.match(idRegex);
+          expect(resp).to.match(idRegex);
         });
       });
 
@@ -153,7 +152,7 @@ describe('Rest API interface', () => {
           if (notificationPullTime[1] - notificationPullTime[0] - defaultPullTime <= timeError) {
             pulledOnTime = true;
           }
-          pulledOnTime.should.be.eql(true);
+          expect(pulledOnTime).to.equal(true);
         });
       }).timeout(3000);
 
@@ -174,7 +173,7 @@ describe('Rest API interface', () => {
           if (notificationPullTime[1] - notificationPullTime[0] - chosenTime <= timeError) {
             pulledOnTime = true;
           }
-          pulledOnTime.should.be.eql(true);
+          expect(pulledOnTime).to.equal(true);
         });
       });
     });
@@ -193,7 +192,7 @@ describe('Rest API interface', () => {
         service.start(chosenTime);
         service.stop();
         setTimeout(() => {
-          pulled.should.be.eql(false);
+          expect(pulled).to.equal(false);
           done();
         }, 300);
       });
@@ -219,10 +218,10 @@ describe('Rest API interface', () => {
           asyncResponse = true;
         });
         service._processEvents(response.notifications);
-        registered.should.be.eql(true);
-        updated.should.be.eql(true);
-        deregistered.should.be.eql(true);
-        asyncResponse.should.be.eql(true);
+        expect(registered).to.equal(true);
+		expect(updated).to.equal(true);
+		expect(deregistered).to.equal(true);
+		expect(asyncResponse).to.equal(true);
       });
     });
 
@@ -234,8 +233,8 @@ describe('Rest API interface', () => {
           .reply(statusCode, response.request);
         return service.get(`/endpoints/${deviceName}${path}`).then((dataAndResponse) => {
           expect(typeof dataAndResponse).to.equal('object');
-          dataAndResponse.data.should.have.property('async-response-id');
-          dataAndResponse.resp.statusCode.should.be.eql(statusCode);
+		  expect(dataAndResponse.data).to.have.property('async-response-id');
+          expect(dataAndResponse.resp.statusCode).to.equal(statusCode);
         });
       });
 
@@ -252,8 +251,8 @@ describe('Rest API interface', () => {
           .reply(statusCode, response.request);
         return service.put(`/endpoints/${deviceName}${path}`, tlvBuffer).then((dataAndResponse) => {
           expect(typeof dataAndResponse).to.equal('object');
-          dataAndResponse.data.should.have.property('async-response-id');
-          dataAndResponse.resp.statusCode.should.be.eql(statusCode);
+          expect(dataAndResponse.data).to.have.property('async-response-id');
+          expect(dataAndResponse.resp.statusCode).to.equal(statusCode);
         });
       });
 
@@ -270,8 +269,8 @@ describe('Rest API interface', () => {
           .reply(statusCode, response.request);
         return service.post(`/endpoints/${deviceName}${path}`).then((dataAndResponse) => {
           expect(typeof dataAndResponse).to.equal('object');
-          dataAndResponse.data.should.have.property('async-response-id');
-          dataAndResponse.resp.statusCode.should.be.eql(statusCode);
+          expect(dataAndResponse.data).to.have.property('async-response-id');
+          expect(dataAndResponse.resp.statusCode).to.equal(statusCode);
         });
       });
 
@@ -285,8 +284,8 @@ describe('Rest API interface', () => {
         const endpointID = 'testNode';
         const endpoint = service.createNode(endpointID);
         expect(typeof endpoint).to.equal('object');
-        endpoint.id.should.be.eql(endpointID);
-        service.endpoints[endpointID].should.be.eql(endpoint);
+        expect(endpoint.id).to.equal(endpointID);
+        expect(service.endpoints[endpointID]).to.equal(endpoint);
       });
     });
 
@@ -296,7 +295,7 @@ describe('Rest API interface', () => {
         const attachedEndpoint = service.createNode(attachedEndpointID);
         service.attachEndpoint(attachedEndpoint);
         expect(typeof service.endpoints[attachedEndpointID]).to.equal('object');
-        service.endpoints[attachedEndpointID].id.should.be.eql(attachedEndpointID);
+        expect(service.endpoints[attachedEndpointID].id).to.equal(attachedEndpointID);
       });
     });
   });
