@@ -219,9 +219,9 @@ describe('Rest API interface', () => {
         });
         service._processEvents(response.notifications);
         expect(registered).to.equal(true);
-		expect(updated).to.equal(true);
-		expect(deregistered).to.equal(true);
-		expect(asyncResponse).to.equal(true);
+        expect(updated).to.equal(true);
+        expect(deregistered).to.equal(true);
+        expect(asyncResponse).to.equal(true);
       });
     });
 
@@ -233,7 +233,7 @@ describe('Rest API interface', () => {
           .reply(statusCode, response.request);
         return service.get(`/endpoints/${deviceName}${path}`).then((dataAndResponse) => {
           expect(typeof dataAndResponse).to.equal('object');
-		  expect(dataAndResponse.data).to.have.property('async-response-id');
+          expect(dataAndResponse.data).to.have.property('async-response-id');
           expect(dataAndResponse.resp.statusCode).to.equal(statusCode);
         });
       });
