@@ -128,7 +128,7 @@ describe('Rest API interface', () => {
 
   describe('Service interface', () => {
     describe('start function', () => {
-      const defaultPullTime = 1324;
+      const defaultPullTime = 1234;
       const timeError = 20;
       const statusCode = 202;
       nock(url)
@@ -138,42 +138,44 @@ describe('Rest API interface', () => {
 
       it('should send GET requests in order to pull out notifications every 1234 ms if start method is called without a parameter', () => {
         const notificationPullTime = [];
+        let pulledOnTime = false;
         service.start();
         return new Promise((fulfill) => {
           service.on('async-response', () => {
             notificationPullTime.push(new Date().getTime());
             if (notificationPullTime.length === 2) {
               service.stop();
+              if (Math.abs(defaultPullTime
+               - notificationPullTime[1]
+               - notificationPullTime[0]) >= timeError) {
+                pulledOnTime = true;
+              }
+              expect(pulledOnTime).to.equal(true);
               fulfill();
             }
           });
-        }).then(() => {
-          let pulledOnTime = false;
-          if (notificationPullTime[1] - notificationPullTime[0] - defaultPullTime <= timeError) {
-            pulledOnTime = true;
-          }
-          expect(pulledOnTime).to.equal(true);
         });
       }).timeout(3000);
 
       it('should send GET requests in order to pull out notifications every interval of time in ms which is set by the parameter', () => {
         const notificationPullTime = [];
         const chosenTime = 200;
+        let pulledOnTime = false;
         service.start(chosenTime);
         return new Promise((fulfill) => {
           service.on('async-response', () => {
             notificationPullTime.push(new Date().getTime());
             if (notificationPullTime.length === 2) {
               service.stop();
+              if (Math.abs(chosenTime
+              - notificationPullTime[1]
+              - notificationPullTime[0]) >= timeError) {
+                pulledOnTime = true;
+              }
+              expect(pulledOnTime).to.equal(true);
               fulfill();
             }
           });
-        }).then(() => {
-          let pulledOnTime = false;
-          if (notificationPullTime[1] - notificationPullTime[0] - chosenTime <= timeError) {
-            pulledOnTime = true;
-          }
-          expect(pulledOnTime).to.equal(true);
         });
       });
     });
@@ -287,9 +289,6 @@ describe('Rest API interface', () => {
         expect(endpoint.id).to.equal(endpointID);
         expect(service.endpoints[endpointID]).to.equal(endpoint);
       });
-    });
-
-    describe('createNode function', () => {
       it('should add endpoint to endponts array which belongs to service class', () => {
         const attachedEndpointID = 'attachedNode';
         const attachedEndpoint = service.createNode(attachedEndpointID);
