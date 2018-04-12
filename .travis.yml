@@ -6,4 +6,3 @@ cache:
     - "node_modules"
 script:
   - npm test
-  - ./node_modules/.bin/eslint .
