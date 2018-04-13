@@ -8,5 +8,6 @@ cache:
     - "node_modules"
 script:
   - npm test
-  - ./node_modules/.bin/eslint .
+  - ./node_modules/.bin/eslint *.js
+  - ./node_modules/.bin/eslint tests/*.js
 
