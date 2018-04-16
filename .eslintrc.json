@@ -16,7 +16,6 @@
       {
         "varsIgnorePattern": "should|expect"
       }
-    ],
-    "no-unused-expressions": "off"
+    ]
   }
 }
