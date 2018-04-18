@@ -56,6 +56,10 @@ describe('Rest API interface', () => {
           expect(typeof err).to.equal('number');
         });
       });
+
+      it('should return rejected promise with exception object if connection is not succesfull', () => device.read(path).catch((err) => {
+        expect(typeof err).to.equal('object');
+      }));
     });
 
     describe('write function', () => {
@@ -78,6 +82,10 @@ describe('Rest API interface', () => {
           expect(typeof err).to.equal('number');
         });
       });
+
+      it('should return rejected promise with exception object if connection is not succesfull', () => device.write(path, () => {}, tlvBuffer).catch((err) => {
+        expect(typeof err).to.equal('object');
+      }));
     });
 
     describe('execute function', () => {
@@ -100,6 +108,10 @@ describe('Rest API interface', () => {
           expect(typeof err).to.equal('number');
         });
       });
+
+      it('should return rejected promise with exception object if connection is not succesfull', () => device.execute(path).catch((err) => {
+        expect(typeof err).to.equal('object');
+      }));
     });
 
     describe('observe function', () => {
@@ -122,6 +134,9 @@ describe('Rest API interface', () => {
           expect(typeof err).to.equal('number');
         });
       });
+      it('should return rejected promise with exception object if connection is not succesfull', () => device.observe(path).catch((err) => {
+        expect(typeof err).to.equal('object');
+      }));
     });
     service.stop();
   });
