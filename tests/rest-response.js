@@ -27,8 +27,14 @@ module.exports = {
     { uri: '/3305/0' },
     { uri: '/3312/0' },
   ],
-  request: {
+  getRequest: {
     'async-response-id': '1521817656#367da52f-6d0c-8550-b218-571b',
+  },
+  putRequest: {
+    'async-response-id': '1521817656#367da52f-6d0c-8550-b218-571w',
+  },
+  postRequest: {
+    'async-response-id': '1521817656#367da52f-6d0c-8550-b218-571e',
   },
   notifications: {
     registrations: [

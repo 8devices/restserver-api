@@ -34,13 +34,17 @@ describe('Rest API interface', () => {
           expect(typeof err).to.equal('number');
         });
       });
+
+      it('should return rejected promise with exception object if connection is not succesfull', () => device.getObjects().catch((err) => {
+        expect(typeof err).to.equal('object');
+      }));
     });
 
     describe('read function', () => {
       it('should return async-response-id ', () => {
         nock(url)
           .get(`/endpoints/${deviceName}${path}`)
-          .reply(202, response.request);
+          .reply(202, response.getRequest);
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.read(path).then((resp) => {
           expect(typeof resp).to.equal('string');
@@ -66,7 +70,7 @@ describe('Rest API interface', () => {
       it('should return async-response-id ', () => {
         nock(url)
           .put(`/endpoints/${deviceName}${path}`)
-          .reply(202, response.request);
+          .reply(202, response.putRequest);
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.write(path, () => {}, tlvBuffer).then((resp) => {
           expect(typeof resp).to.equal('string');
@@ -92,9 +96,9 @@ describe('Rest API interface', () => {
       it('should return async-response-id ', () => {
         nock(url)
           .post(`/endpoints/${deviceName}${path}`)
-          .reply(202, response.request);
+          .reply(202, response.postRequest);
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
-        return device.execute(path).then((resp) => {
+        return device.execute(path, () => {}).then((resp) => {
           expect(typeof resp).to.equal('string');
           expect(resp).to.match(idRegex);
         });
@@ -118,7 +122,7 @@ describe('Rest API interface', () => {
       it('should return async-response-id ', () => {
         nock(url)
           .put(`/subscriptions/${deviceName}${path}`)
-          .reply(202, response.request);
+          .reply(202, response.putRequest);
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.observe(path).then((resp) => {
           expect(typeof resp).to.equal('string');
@@ -247,7 +251,7 @@ describe('Rest API interface', () => {
         const statusCode = 202;
         nock(url)
           .get(`/endpoints/${deviceName}${path}`)
-          .reply(statusCode, response.request);
+          .reply(statusCode, response.getRequest);
         return service.get(`/endpoints/${deviceName}${path}`).then((dataAndResponse) => {
           expect(typeof dataAndResponse).to.equal('object');
           expect(dataAndResponse.data).to.have.property('async-response-id');
@@ -265,7 +269,7 @@ describe('Rest API interface', () => {
         const statusCode = 202;
         nock(url)
           .put(`/endpoints/${deviceName}${path}`)
-          .reply(statusCode, response.request);
+          .reply(statusCode, response.putRequest);
         return service.put(`/endpoints/${deviceName}${path}`, tlvBuffer).then((dataAndResponse) => {
           expect(typeof dataAndResponse).to.equal('object');
           expect(dataAndResponse.data).to.have.property('async-response-id');
@@ -283,7 +287,7 @@ describe('Rest API interface', () => {
         const statusCode = 202;
         nock(url)
           .post(`/endpoints/${deviceName}${path}`)
-          .reply(statusCode, response.request);
+          .reply(statusCode, response.postRequest);
         return service.post(`/endpoints/${deviceName}${path}`).then((dataAndResponse) => {
           expect(typeof dataAndResponse).to.equal('object');
           expect(dataAndResponse.data).to.have.property('async-response-id');
