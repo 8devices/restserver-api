@@ -41,10 +41,19 @@ describe('Rest API interface', () => {
     });
 
     describe('read function', () => {
-      it('should return async-response-id ', () => {
-        nock(url)
+      nock(url)
           .get(`/endpoints/${deviceName}${path}`)
+          .times(2)
           .reply(202, response.getRequest);
+      it('should return async-response-id ', () => {
+        const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
+        return device.read(path).then((resp) => {
+          expect(typeof resp).to.equal('string');
+          expect(resp).to.match(idRegex);
+        });
+      });
+      
+      it('should return async-response-id ', () => {
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.read(path).then((resp) => {
           expect(typeof resp).to.equal('string');
@@ -156,17 +165,17 @@ describe('Rest API interface', () => {
         .reply(statusCode, response.oneAsyncResponse);
 
       it('should send GET requests in order to pull out notifications every 1234 ms if start method is called without a parameter', () => {
-        const notificationPullTime = [];
+        const pullTime = [];
         let pulledOnTime = false;
+        let timeDifference = null;
         service.start();
         return new Promise((fulfill) => {
           service.on('async-response', () => {
-            notificationPullTime.push(new Date().getTime());
-            if (notificationPullTime.length === 2) {
+            pullTime.push(new Date().getTime());
+            if (pullTime.length === 2) {
               service.stop();
-              if (Math.abs(defaultPullTime
-               - notificationPullTime[1]
-               - notificationPullTime[0]) >= timeError) {
+              timeDifference = Math.abs(defaultPullTime - pullTime[1] - pullTime[0]);
+              if (timeDifference >= timeError) {
                 pulledOnTime = true;
               }
               expect(pulledOnTime).to.equal(true);
@@ -177,18 +186,18 @@ describe('Rest API interface', () => {
       }).timeout(3000);
 
       it('should send GET requests in order to pull out notifications every interval of time in ms which is set by the parameter', () => {
-        const notificationPullTime = [];
+        const pullTime = [];
+        let timeDifference = null;
         const chosenTime = 200;
         let pulledOnTime = false;
         service.start(chosenTime);
         return new Promise((fulfill) => {
           service.on('async-response', () => {
-            notificationPullTime.push(new Date().getTime());
-            if (notificationPullTime.length === 2) {
+            pullTime.push(new Date().getTime());
+            if (pullTime.length === 2) {
               service.stop();
-              if (Math.abs(chosenTime
-              - notificationPullTime[1]
-              - notificationPullTime[0]) >= timeError) {
+              timeDifference = Math.abs(chosenTime - pullTime[1] - pullTime[0]);
+              if (timeDifference >= timeError) {
                 pulledOnTime = true;
               }
               expect(pulledOnTime).to.equal(true);
