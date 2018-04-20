@@ -54,12 +54,15 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return status code and payload in a callback function which is given as a parameter ', () => device.read(path, (statusCode, payload) => {
-        expect(typeof statusCode).to.equal('number');
-        expect(typeof payload).to.equal('string');
-      }).then(() => {
-        service._processEvents(response.responsesOfAllOperations);
-      }));
+      it('should return status code and payload in a callback function which is given as a parameter ', (done) => {
+        device.read(path, (statusCode, payload) => {
+          expect(typeof statusCode).to.equal('number');
+          expect(typeof payload).to.equal('string');
+          done();
+        }).then(() => {
+          service._processEvents(response.responsesOfAllOperations);
+        });
+      });
 
       it('should return an error (status code number) if status code is not 202', () => {
         nock(url)
@@ -70,7 +73,7 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return rejected promise with exception object if connection is not succesfull', () => device.read(path).catch((err) => {
+      it('should reject promise when connection fails', () => device.read(path).catch((err) => {
         expect(typeof err).to.equal('object');
       }));
     });
@@ -89,12 +92,15 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return status code in a callback function which is given as a parameter ', () => device.write(path, (statusCode, payload) => {
-        expect(typeof statusCode).to.equal('number');
-        expect(payload).to.equal(undefined);
-      }, tlvBuffer).then(() => {
-        service._processEvents(response.responsesOfAllOperations);
-      }));
+      it('should return status code in a callback function which is given as a parameter ', (done) => {
+        device.write(path, (statusCode, payload) => {
+          expect(typeof statusCode).to.equal('number');
+          expect(payload).to.equal(undefined);
+          done();
+        }, tlvBuffer).then(() => {
+          service._processEvents(response.responsesOfAllOperations);
+        });
+      });
 
       it('should return an error (status code number) if status code is not 202', () => {
         nock(url)
@@ -105,7 +111,7 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return rejected promise with exception object if connection is not succesfull', () => device.write(path, () => {}, tlvBuffer).catch((err) => {
+      it('should reject promise when connection fails', () => device.write(path, () => {}, tlvBuffer).catch((err) => {
         expect(typeof err).to.equal('object');
       }));
     });
@@ -124,12 +130,15 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return status code in a callback function which is given as a parameter ', () => device.execute(path, (statusCode, payload) => {
-        expect(typeof statusCode).to.equal('number');
-        expect(payload).to.equal(undefined);
-      }).then(() => {
-        service._processEvents(response.responsesOfAllOperations);
-      }));
+      it('should return status code in a callback function which is given as a parameter ', (done) => {
+        device.execute(path, (statusCode, payload) => {
+          expect(typeof statusCode).to.equal('number');
+          expect(payload).to.equal(undefined);
+          done();
+        }).then(() => {
+          service._processEvents(response.responsesOfAllOperations);
+        });
+      });
 
       it('should return an error (status code number) if status code is not 202', () => {
         nock(url)
@@ -140,7 +149,7 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return rejected promise with exception object if connection is not succesfull', () => device.execute(path).catch((err) => {
+      it('should reject promise when connection fails', () => device.execute(path).catch((err) => {
         expect(typeof err).to.equal('object');
       }));
     });
@@ -159,12 +168,15 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return status code and payload in a callback function which is given as a parameter ', () => device.observe(path, (statusCode, payload) => {
-        expect(typeof statusCode).to.equal('number');
-        expect(typeof payload).to.equal('string');
-      }).then(() => {
-        service._processEvents(response.responsesOfAllOperations);
-      }));
+      it('should return status code and payload in a callback function which is given as a parameter ', (done) => {
+        device.observe(path, (statusCode, payload) => {
+          expect(typeof statusCode).to.equal('number');
+          expect(typeof payload).to.equal('string');
+          done();
+        }).then(() => {
+          service._processEvents(response.responsesOfAllOperations);
+        });
+      });
 
       it('should return an error (status code number) if status code is not 202', () => {
         nock(url)
@@ -175,7 +187,7 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return rejected promise with exception object if connection is not succesfull', () => device.observe(path).catch((err) => {
+      it('should reject promise when connection fails', () => device.observe(path).catch((err) => {
         expect(typeof err).to.equal('object');
       }));
     });
@@ -295,7 +307,7 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return rejected promise with exception object if connection is not succesfull', () => service.get(`/endpoints/${deviceName}${path}`).catch((err) => {
+      it('should reject promise when connection fails', () => service.get(`/endpoints/${deviceName}${path}`).catch((err) => {
         expect(typeof err).to.equal('object');
       }));
     });
@@ -313,7 +325,7 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return rejected promise with exception object if connection is not succesfull', () => service.put(`/endpoints/${deviceName}${path}`, tlvBuffer).catch((err) => {
+      it('should reject promise when connection fails', () => service.put(`/endpoints/${deviceName}${path}`, tlvBuffer).catch((err) => {
         expect(typeof err).to.equal('object');
       }));
     });
@@ -331,7 +343,7 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return rejected promise with exception object if connection is not succesfull', () => service.post(`/endpoints/${deviceName}${path}`).catch((err) => {
+      it('should reject promise when connection fails', () => service.post(`/endpoints/${deviceName}${path}`).catch((err) => {
         expect(typeof err).to.equal('object');
       }));
     });
