@@ -58,7 +58,7 @@ describe('Rest API interface', () => {
         expect(typeof statusCode).to.equal('number');
         expect(typeof payload).to.equal('string');
       }).then(() => {
-        service._processEvents(response.readResponse);
+        service._processEvents(response.responsesOfAllOperations);
       }));
 
       it('should return an error (status code number) if status code is not 202', () => {
@@ -89,10 +89,11 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return status code in a callback function which is given as a parameter ', () => device.write(path, (statusCode) => {
+      it('should return status code in a callback function which is given as a parameter ', () => device.write(path, (statusCode, payload) => {
         expect(typeof statusCode).to.equal('number');
+        expect(payload).to.equal(undefined);
       }, tlvBuffer).then(() => {
-        service._processEvents(response.writeResponse);
+        service._processEvents(response.responsesOfAllOperations);
       }));
 
       it('should return an error (status code number) if status code is not 202', () => {
@@ -123,10 +124,11 @@ describe('Rest API interface', () => {
         });
       });
 
-      it('should return status code in a callback function which is given as a parameter ', () => device.execute(path, (statusCode) => {
+      it('should return status code in a callback function which is given as a parameter ', () => device.execute(path, (statusCode, payload) => {
         expect(typeof statusCode).to.equal('number');
+        expect(payload).to.equal(undefined);
       }).then(() => {
-        service._processEvents(response.executeResponse);
+        service._processEvents(response.responsesOfAllOperations);
       }));
 
       it('should return an error (status code number) if status code is not 202', () => {
@@ -161,7 +163,7 @@ describe('Rest API interface', () => {
         expect(typeof statusCode).to.equal('number');
         expect(typeof payload).to.equal('string');
       }).then(() => {
-        service._processEvents(response.observeResponse);
+        service._processEvents(response.responsesOfAllOperations);
       }));
 
       it('should return an error (status code number) if status code is not 202', () => {
