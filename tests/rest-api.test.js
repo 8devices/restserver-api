@@ -42,9 +42,10 @@ describe('Rest API interface', () => {
 
     describe('read function', () => {
       nock(url)
-          .get(`/endpoints/${deviceName}${path}`)
-          .times(2)
-          .reply(202, response.getRequest);
+        .get(`/endpoints/${deviceName}${path}`)
+        .times(2)
+        .reply(202, response.readRequest);
+
       it('should return async-response-id ', () => {
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.read(path).then((resp) => {
@@ -52,14 +53,13 @@ describe('Rest API interface', () => {
           expect(resp).to.match(idRegex);
         });
       });
-      
-      it('should return async-response-id ', () => {
-        const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
-        return device.read(path).then((resp) => {
-          expect(typeof resp).to.equal('string');
-          expect(resp).to.match(idRegex);
-        });
-      });
+
+      it('should return status code and payload in a callback function which is given as a parameter ', () => device.read(path, (statusCode, payload) => {
+        expect(typeof statusCode).to.equal('number');
+        expect(typeof payload).to.equal('string');
+      }).then(() => {
+        service._processEvents(response.readResponse);
+      }));
 
       it('should return an error (status code number) if status code is not 202', () => {
         nock(url)
@@ -76,16 +76,24 @@ describe('Rest API interface', () => {
     });
 
     describe('write function', () => {
+      nock(url)
+        .put(`/endpoints/${deviceName}${path}`)
+        .times(2)
+        .reply(202, response.writeRequest);
+
       it('should return async-response-id ', () => {
-        nock(url)
-          .put(`/endpoints/${deviceName}${path}`)
-          .reply(202, response.putRequest);
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.write(path, () => {}, tlvBuffer).then((resp) => {
           expect(typeof resp).to.equal('string');
           expect(resp).to.match(idRegex);
         });
       });
+
+      it('should return status code in a callback function which is given as a parameter ', () => device.write(path, (statusCode) => {
+        expect(typeof statusCode).to.equal('number');
+      }, tlvBuffer).then(() => {
+        service._processEvents(response.writeResponse);
+      }));
 
       it('should return an error (status code number) if status code is not 202', () => {
         nock(url)
@@ -102,16 +110,24 @@ describe('Rest API interface', () => {
     });
 
     describe('execute function', () => {
+      nock(url)
+        .post(`/endpoints/${deviceName}${path}`)
+        .times(2)
+        .reply(202, response.executeRequest);
+
       it('should return async-response-id ', () => {
-        nock(url)
-          .post(`/endpoints/${deviceName}${path}`)
-          .reply(202, response.postRequest);
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.execute(path, () => {}).then((resp) => {
           expect(typeof resp).to.equal('string');
           expect(resp).to.match(idRegex);
         });
       });
+
+      it('should return status code in a callback function which is given as a parameter ', () => device.execute(path, (statusCode) => {
+        expect(typeof statusCode).to.equal('number');
+      }).then(() => {
+        service._processEvents(response.executeResponse);
+      }));
 
       it('should return an error (status code number) if status code is not 202', () => {
         nock(url)
@@ -128,16 +144,25 @@ describe('Rest API interface', () => {
     });
 
     describe('observe function', () => {
+      nock(url)
+        .put(`/subscriptions/${deviceName}${path}`)
+        .times(2)
+        .reply(202, response.observeRequest);
+
       it('should return async-response-id ', () => {
-        nock(url)
-          .put(`/subscriptions/${deviceName}${path}`)
-          .reply(202, response.putRequest);
         const idRegex = /^\d+#[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}$/g;
         return device.observe(path).then((resp) => {
           expect(typeof resp).to.equal('string');
           expect(resp).to.match(idRegex);
         });
       });
+
+      it('should return status code and payload in a callback function which is given as a parameter ', () => device.observe(path, (statusCode, payload) => {
+        expect(typeof statusCode).to.equal('number');
+        expect(typeof payload).to.equal('string');
+      }).then(() => {
+        service._processEvents(response.observeResponse);
+      }));
 
       it('should return an error (status code number) if status code is not 202', () => {
         nock(url)
@@ -147,6 +172,7 @@ describe('Rest API interface', () => {
           expect(typeof err).to.equal('number');
         });
       });
+
       it('should return rejected promise with exception object if connection is not succesfull', () => device.observe(path).catch((err) => {
         expect(typeof err).to.equal('object');
       }));
@@ -228,7 +254,6 @@ describe('Rest API interface', () => {
       });
     });
 
-
     describe('_processEvents function', () => {
       it('should handle notifications', () => {
         let registered = false;
@@ -260,7 +285,7 @@ describe('Rest API interface', () => {
         const statusCode = 202;
         nock(url)
           .get(`/endpoints/${deviceName}${path}`)
-          .reply(statusCode, response.getRequest);
+          .reply(statusCode, response.readRequest);
         return service.get(`/endpoints/${deviceName}${path}`).then((dataAndResponse) => {
           expect(typeof dataAndResponse).to.equal('object');
           expect(dataAndResponse.data).to.have.property('async-response-id');
@@ -278,7 +303,7 @@ describe('Rest API interface', () => {
         const statusCode = 202;
         nock(url)
           .put(`/endpoints/${deviceName}${path}`)
-          .reply(statusCode, response.putRequest);
+          .reply(statusCode, response.writeRequest);
         return service.put(`/endpoints/${deviceName}${path}`, tlvBuffer).then((dataAndResponse) => {
           expect(typeof dataAndResponse).to.equal('object');
           expect(dataAndResponse.data).to.have.property('async-response-id');
@@ -296,7 +321,7 @@ describe('Rest API interface', () => {
         const statusCode = 202;
         nock(url)
           .post(`/endpoints/${deviceName}${path}`)
-          .reply(statusCode, response.postRequest);
+          .reply(statusCode, response.executeRequest);
         return service.post(`/endpoints/${deviceName}${path}`).then((dataAndResponse) => {
           expect(typeof dataAndResponse).to.equal('object');
           expect(dataAndResponse.data).to.have.property('async-response-id');
@@ -317,6 +342,7 @@ describe('Rest API interface', () => {
         expect(endpoint.id).to.equal(endpointID);
         expect(service.endpoints[endpointID]).to.equal(endpoint);
       });
+
       it('should add endpoint to endponts array which belongs to service class', () => {
         const attachedEndpointID = 'attachedNode';
         const attachedEndpoint = service.createNode(attachedEndpointID);
