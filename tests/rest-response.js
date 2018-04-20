@@ -46,8 +46,14 @@ module.exports = {
     'async-responses': [
       {
         timestamp: 1400009933, id: '1521817656#367da52f-6d0c-8550-b218-571b', status: 200, payload: '5Ba3AAAAAA==',
+      },
+      {
         timestamp: 1400009933, id: '1521817656#367da52f-6d0c-8550-b218-571w', status: 200,
+      },
+      {
         timestamp: 1400009933, id: '1521817656#367da52f-6d0c-8550-b218-571e', status: 200,
+      },
+      {
         timestamp: 1400009933, id: '1521817656#367da52f-6d0c-8550-b218-571o', status: 200, payload: '5Ba3AAAAAA==',
       },
     ],
