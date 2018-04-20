@@ -239,7 +239,7 @@ describe('Rest API interface', () => {
       nock(url)
         .get('/notification/pull')
         .reply(statusCode, response.oneAsyncResponse);
-      it('Stop method should stop sending GET requests for notification pulling', (done) => {
+      it('should stop sending GET requests for notification pulling', (done) => {
         const chosenTime = 200;
         let pulled = false;
         service.on('async-response', () => {
