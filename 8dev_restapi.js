@@ -134,15 +134,15 @@ class Service extends EventEmitter {
         },
         headers: { 'Content-Type': 'application/json' },
       };
-      const setCallback = this.client.put(`${this.config.host}/notification/callback`, args, () => {});
-      setCallback.on('error', () => {
-        console.log('Failed to set a callback!');
-      });
       this.express.put('/notification', (req, resp) => {
         this._processEvents(req.body);
         resp.send();
       });
       this.server = this.express.listen(5727);
+      const setCallback = this.client.put(`${this.config.host}/notification/callback`, args, () => {});
+      setCallback.on('error', () => {
+        console.log('Failed to set a callback!');
+      });
     } else {
       this.pollTimer = setInterval(() => {
         this.get('/notification/pull').then((dataAndResponse) => {
