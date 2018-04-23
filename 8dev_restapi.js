@@ -125,37 +125,42 @@ class Service extends EventEmitter {
     this.express.use(parser.json());
   }
 
-  start(interval = 1234) {
-    this.pollTimer = setInterval(() => {
-      this.get('/notification/pull').then((dataAndResponse) => {
-        this._processEvents(dataAndResponse.data);
-      }).catch(() => {
-        console.error('Failed to pull notifications!');
+  start(interval) {
+    if (interval === undefined) {
+      const args = {
+        data: {
+          url: 'http://localhost:5727/notification',
+          headers: {},
+        },
+        headers: { 'Content-Type': 'application/json' },
+      };
+      const setCallback = this.client.put(`${this.config.host}/notification/callback`, args, () => {});
+      setCallback.on('error', () => {
+        console.log('Failed to set a callback!');
       });
-    }, interval);
+      this.express.put('/notification', (req, resp) => {
+        this._processEvents(req.body);
+        resp.send();
+      });
+      this.server = this.express.listen(5727);
+    } else {
+      this.pollTimer = setInterval(() => {
+        this.get('/notification/pull').then((dataAndResponse) => {
+          this._processEvents(dataAndResponse.data);
+        }).catch(() => {
+          console.error('Failed to pull notifications!');
+        });
+      }, interval);
+    }
   }
 
   stop() {
-    clearInterval(this.pollTimer);
-  }
-
-  setCallback() {
-    const args = {
-      data: {
-        url: 'http://localhost:5727/notification',
-        headers: {},
-      },
-      headers: { 'Content-Type': 'application/json' },
-    };
-    const callbackRequest = this.client.put(`${this.config.host}/notification/callback`, args, () => {});
-    callbackRequest.on('error', (err) => {
-      console.log(err);
-    });
-    this.express.put('/notification', (req, resp) => {
-      this._processEvents(req.body);
-      resp.send();
-    });
-    this.server = this.express.listen(5727);
+    if (this.server !== undefined) {
+      this.server.close();
+    }
+    if (this.pollTimer !== undefined) {
+      clearInterval(this.pollTimer);
+    }
   }
 
   addTlvSerializer() {
