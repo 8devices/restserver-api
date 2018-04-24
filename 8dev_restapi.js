@@ -221,11 +221,8 @@ class Service extends EventEmitter {
 
   post(path) {
     return new Promise((fulfill, reject) => {
-      const args = {
-        headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
-      };
       const url = this.config.host + path;
-      const postRequest = this.client.post(url, args, (data, resp) => {
+      const postRequest = this.client.post(url, undefined, (data, resp) => {
         const dataAndResponse = {};
         dataAndResponse.data = data;
         dataAndResponse.resp = resp;
