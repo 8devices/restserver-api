@@ -139,10 +139,10 @@ class Service extends EventEmitter {
         resp.send();
       });
       this.server = this.express.listen(5727);
-      const setCallback = this.client.put(`${this.config.host}/notification/callback`, args, () => {});
-      setCallback.on('error', () => {
-        console.log('Failed to set a callback!');
-      });
+      this.put('/notification/callback', args)
+        .catch(() => {
+          console.error('Failed to set a callback!');
+        });
     } else {
       this.pollTimer = setInterval(() => {
         this.get('/notification/pull').then((dataAndResponse) => {
@@ -195,12 +195,17 @@ class Service extends EventEmitter {
     });
   }
 
-  put(path, tlvBuffer) {
+  put(path, argument) {
     return new Promise((fulfill, reject) => {
-      const args = {
-        headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
-        data: tlvBuffer,
-      };
+      let args;
+      if (Buffer.isBuffer(argument)) {
+        args = {
+          headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
+          data: argument,
+        };
+      } else if (typeof argument === 'object' && Object.prototype.hasOwnProperty.call(argument, 'data') && Object.prototype.hasOwnProperty.call(argument, 'headers')) {
+        args = argument;
+      }
       const url = this.config.host + path;
       const putRequest = this.client.put(url, args, (data, resp) => {
         const dataAndResponse = {};
