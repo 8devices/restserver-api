@@ -127,19 +127,17 @@ class Service extends EventEmitter {
 
   start(interval) {
     if (interval === undefined) {
-      const args = {
-        data: {
-          url: 'http://localhost:5727/notification',
-          headers: {},
-        },
-        headers: { 'Content-Type': 'application/json' },
+      const data = {
+        url: 'http://localhost:5727/notification',
+        headers: {},
       };
+      const type = 'application/json';
       this.express.put('/notification', (req, resp) => {
         this._processEvents(req.body);
         resp.send();
       });
       this.server = this.express.listen(5727);
-      this.put('/notification/callback', args)
+      this.put('/notification/callback', data, type)
         .catch(() => {
           console.error('Failed to set a callback!');
         });
@@ -195,17 +193,12 @@ class Service extends EventEmitter {
     });
   }
 
-  put(path, argument) {
+  put(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
-      let args;
-      if (Buffer.isBuffer(argument)) {
-        args = {
-          headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
-          data: argument,
-        };
-      } else if (typeof argument === 'object' && Object.prototype.hasOwnProperty.call(argument, 'data') && Object.prototype.hasOwnProperty.call(argument, 'headers')) {
-        args = argument;
-      }
+      const args = {
+        headers: { 'Content-Type': type },
+        data: argument,
+      };
       const url = this.config.host + path;
       const putRequest = this.client.put(url, args, (data, resp) => {
         const dataAndResponse = {};
