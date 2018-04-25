@@ -215,7 +215,7 @@ class Service extends EventEmitter {
   post(path) {
     return new Promise((fulfill, reject) => {
       const url = this.config.host + path;
-      const postRequest = this.client.post(url, undefined, (data, resp) => {
+      const postRequest = this.client.post(url, (data, resp) => {
         const dataAndResponse = {};
         dataAndResponse.data = data;
         dataAndResponse.resp = resp;
