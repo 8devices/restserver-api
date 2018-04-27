@@ -123,7 +123,7 @@ class Service extends EventEmitter {
       polling: false,
       port: 5728,
     };
-    this.loadConfig(opts);
+    this.configure(opts);
     this.client = new rest.Client();
     this.endpoints = [];
     this.addTlvSerializer();
@@ -131,13 +131,17 @@ class Service extends EventEmitter {
     this.express.use(parser.json());
   }
 
-  loadConfig(opts) {
+  configure(opts) {
     Object.keys(opts).forEach((opt) => {
       this.config[opt] = opts[opt];
     });
   }
 
-  start() {
+  start(opts) {
+	this.stop();
+	if (opts !== undefined) {
+      this.configure(opts);
+    }
     if (!this.config.polling) {
       const data = {
         url: `http://localhost:${this.config.port}/notification`,
@@ -167,9 +171,11 @@ class Service extends EventEmitter {
   stop() {
     if (this.server !== undefined) {
       this.server.close();
+      this.server = undefined;
     }
     if (this.pollTimer !== undefined) {
       clearInterval(this.pollTimer);
+      this.pollTimer = undefined;
     }
   }
 
