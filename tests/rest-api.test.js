@@ -201,7 +201,7 @@ describe('Rest API interface', () => {
         nock(url)
           .put('/notification/callback')
           .reply(200);
-        service.start({polling: false});
+        service.start({ polling: false });
         nock(url)
           .get(`/endpoints/${deviceName}${path}`)
           .reply(202, response.readRequest);

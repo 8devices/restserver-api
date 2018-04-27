@@ -138,8 +138,8 @@ class Service extends EventEmitter {
   }
 
   start(opts) {
-	this.stop();
-	if (opts !== undefined) {
+    this.stop();
+    if (opts !== undefined) {
       this.configure(opts);
     }
     if (!this.config.polling) {
