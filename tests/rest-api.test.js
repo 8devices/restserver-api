@@ -11,6 +11,7 @@ describe('Rest API interface', () => {
   const deviceName = 'threeSeven';
   const path = '/3312/0/5850';
   const service = new restAPI.Service({ host: url });
+  let serviceForPolling = new restAPI.Service({ host: url, polling: true });
   const device = new restAPI.Device(service, deviceName);
   const tlvBuffer = Buffer.from([0xe4, 0x16, 0x44, 0x00, 0x00, 0x00, 0x01]);
 
@@ -215,26 +216,29 @@ describe('Rest API interface', () => {
           data: response.readResponse,
           headers: { 'Content-Type': 'application/json' },
         };
-        this.client.put('http://localhost:5727/notification', args, () => {});
+        this.client.put('http://localhost:5728/notification', args, () => {});
       });
 
-      it('should send GET requests in order to pull out notifications every interval of time in ms which is set by the parameter', () => {
+      service.stop();
+
+      it('should send GET requests to pull out notifications every interval of time in ms which is set by the parameter when initializing service object', () => {
         const statusCode = 202;
         nock(url)
           .get('/notification/pull')
-          .times(4)
+          .times(2)
           .reply(statusCode, response.oneAsyncResponse);
         const timeError = 20;
         const pullTime = [];
         let timeDifference = null;
         const chosenTime = 200;
         let pulledOnTime = false;
-        service.start(chosenTime);
+        serviceForPolling = new restAPI.Service({ host: url, polling: true, interval: chosenTime });
+        serviceForPolling.start();
         return new Promise((fulfill) => {
-          service.on('async-response', () => {
+          serviceForPolling.on('async-response', () => {
             pullTime.push(new Date().getTime());
             if (pullTime.length === 2) {
-              service.stop();
+              serviceForPolling.stop();
               timeDifference = Math.abs(chosenTime - pullTime[1] - pullTime[0]);
               if (timeDifference >= timeError) {
                 pulledOnTime = true;
@@ -249,17 +253,39 @@ describe('Rest API interface', () => {
 
     describe('stop function', () => {
       const statusCode = 202;
-      nock(url)
-        .get('/notification/pull')
-        .reply(statusCode, response.oneAsyncResponse);
-      it('should stop sending GET requests for notification pulling', (done) => {
-        const chosenTime = 200;
-        let pulled = false;
+
+      it('should shut down notification listener and stop process notifications', (done) => {
+        nock(url)
+          .put('/notification/callback')
+          .reply(statusCode);
+        let recieved = false;
         service.on('async-response', () => {
+          recieved = true;
+        });
+        service.start();
+        service.stop();
+        const args = {
+          data: response.readResponse,
+          headers: { 'Content-Type': 'application/json' },
+        };
+        const sendNotification = this.client.put('http://localhost:5728/notification', args, () => {});
+        sendNotification.on('error', (err) => {
+          expect(typeof err).to.equal('object');
+          expect(recieved).to.equal(false);
+          done();
+        });
+      });
+
+      it('should stop sending GET requests for notification pulling', (done) => {
+        nock(url)
+          .get('/notification/pull')
+          .reply(statusCode, response.oneAsyncResponse);
+        let pulled = false;
+        serviceForPolling.on('async-response', () => {
           pulled = true;
         });
-        service.start(chosenTime);
-        service.stop();
+        serviceForPolling.start();
+        serviceForPolling.stop();
         setTimeout(() => {
           expect(pulled).to.equal(false);
           done();
