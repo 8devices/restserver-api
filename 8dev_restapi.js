@@ -172,11 +172,68 @@ class Service extends EventEmitter {
     if (this.server !== undefined) {
       this.server.close();
       this.server = undefined;
+      this.deleteNotificationCallback();
     }
     if (this.pollTimer !== undefined) {
       clearInterval(this.pollTimer);
       this.pollTimer = undefined;
     }
+  }
+
+  deleteNotificationCallback() {
+    return new Promise((fulfill, reject) => {
+      this.delete('/notification/callback').then((dataAndResponse) => {
+        if (dataAndResponse.resp.statusCode === 204) {
+          fulfill(dataAndResponse.data);
+        } else {
+          reject(dataAndResponse.resp.statusCode);
+        }
+      }).catch((err) => {
+        reject(err);
+      });
+    });
+  }
+
+  checkNotificationCallback() {
+    return new Promise((fulfill, reject) => {
+      this.get('/notification/callback').then((dataAndResponse) => {
+        if (dataAndResponse.resp.statusCode === 200) {
+          fulfill(dataAndResponse.data);
+        } else {
+          reject(dataAndResponse.resp.statusCode);
+        }
+      }).catch((err) => {
+        reject(err);
+      });
+    });
+  }
+
+  getDevices() {
+    return new Promise((fulfill, reject) => {
+      this.get('/endpoints').then((dataAndResponse) => {
+        if (dataAndResponse.resp.statusCode === 200) {
+          fulfill(dataAndResponse.data);
+        } else {
+          reject(dataAndResponse.resp.statusCode);
+        }
+      }).catch((err) => {
+        reject(err);
+      });
+    });
+  }
+
+  getVersion() {
+    return new Promise((fulfill, reject) => {
+      this.get('/version').then((dataAndResponse) => {
+        if (dataAndResponse.resp.statusCode === 200) {
+          fulfill(dataAndResponse.data);
+        } else {
+          reject(dataAndResponse.resp.statusCode);
+        }
+      }).catch((err) => {
+        reject(err);
+      });
+    });
   }
 
   addTlvSerializer() {
@@ -225,6 +282,21 @@ class Service extends EventEmitter {
         fulfill(dataAndResponse);
       });
       putRequest.on('error', (err) => {
+        reject(err);
+      });
+    });
+  }
+
+  delete(path) {
+    return new Promise((fulfill, reject) => {
+      const url = this.config.host + path;
+      const postRequest = this.client.delete(url, (data, resp) => {
+        const dataAndResponse = {};
+        dataAndResponse.data = data;
+        dataAndResponse.resp = resp;
+        fulfill(dataAndResponse);
+      });
+      postRequest.on('error', (err) => {
         reject(err);
       });
     });
