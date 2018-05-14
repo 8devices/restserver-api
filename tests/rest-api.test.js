@@ -374,7 +374,7 @@ describe('Rest API interface', () => {
     });
 
     describe('getVersion function', () => {
-      it('should return an array of all endponts with their data', () => {
+      it('should return a buffer which defines the version of REST server', () => {
         nock(url)
           .get('/version')
           .reply(200, response.version);
