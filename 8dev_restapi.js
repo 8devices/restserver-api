@@ -225,7 +225,7 @@ class Service extends EventEmitter {
   getVersion() {
     return new Promise((fulfill, reject) => {
       this.get('/version').then((dataAndResponse) => {
-          fulfill(dataAndResponse.data);
+        fulfill(dataAndResponse.data);
       }).catch((err) => {
         reject(err);
       });
