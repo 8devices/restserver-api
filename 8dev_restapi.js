@@ -225,11 +225,7 @@ class Service extends EventEmitter {
   getVersion() {
     return new Promise((fulfill, reject) => {
       this.get('/version').then((dataAndResponse) => {
-        if (dataAndResponse.resp.statusCode === 200) {
           fulfill(dataAndResponse.data);
-        } else {
-          reject(dataAndResponse.resp.statusCode);
-        }
       }).catch((err) => {
         reject(err);
       });
