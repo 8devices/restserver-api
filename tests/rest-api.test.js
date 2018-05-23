@@ -378,9 +378,11 @@ describe('Rest API interface', () => {
         nock(url)
           .get('/version')
           .reply(200, response.version);
+        const versionRegex = /^1\.\d+\.\d+$/;
         return service.getVersion().then((resp) => {
           expect(typeof resp).to.equal('object');
-          expect(resp.length).to.equal(5);
+          expect(resp).to.match(versionRegex);
+          expect(resp.toString()).to.equal(response.version);
         });
       });
 

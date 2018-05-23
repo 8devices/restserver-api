@@ -131,7 +131,7 @@ module.exports = {
     status: 'ACTIVE',
     q: true
   }],
-  version: Buffer.from([0x31, 0x2e, 0x30, 0x2e, 0x30]),
+  version: '1.0.0',
   oneAsyncResponse: {
     registrations: [
       { name: 'fourFive' },
