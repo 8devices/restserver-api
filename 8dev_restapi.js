@@ -143,26 +143,17 @@ class Service extends EventEmitter {
       this.configure(opts);
     }
     if (!this.config.polling) {
-      const data = {
-        url: `http://localhost:${this.config.port}/notification`,
-        headers: {},
-      };
-      const type = 'application/json';
-      this.express.put('/notification', (req, resp) => {
-        this._processEvents(req.body);
-        resp.send();
-      });
-      this.server = this.express.listen(this.config.port);
-      this.put('/notification/callback', data, type)
-        .catch(() => {
-          console.error('Failed to set a callback!');
+      this.createServer();
+      this.registerNotificationCallback()
+        .catch((err) => {
+          console.error(`Failed to set notification callback: ${err}`);
         });
     } else {
       this.pollTimer = setInterval(() => {
-        this.get('/notification/pull').then((dataAndResponse) => {
-          this._processEvents(dataAndResponse.data);
-        }).catch(() => {
-          console.error('Failed to pull notifications!');
+        this.pullNotification().then((data) => {
+          this._processEvents(data);
+        }).catch((err) => {
+          console.error(`Failed to pull notifications: ${err}`);
         });
       }, this.config.interval);
     }
@@ -178,6 +169,33 @@ class Service extends EventEmitter {
       clearInterval(this.pollTimer);
       this.pollTimer = undefined;
     }
+  }
+
+  createServer() {
+    this.express.put('/notification', (req, resp) => {
+      this._processEvents(req.body);
+      resp.send();
+    });
+    this.server = this.express.listen(this.config.port);
+  }
+
+  registerNotificationCallback() {
+    return new Promise((fulfill, reject) => {
+      const data = {
+        url: `http://localhost:${this.config.port}/notification`,
+        headers: {},
+      };
+      const type = 'application/json';
+      this.put('/notification/callback', data, type).then((dataAndResponse) => {
+        if (dataAndResponse.resp.statusCode === 204) {
+          fulfill(dataAndResponse.data);
+        } else {
+          reject(dataAndResponse.resp.statusCode);
+        }
+      }).catch((err) => {
+        reject(err);
+      });
+    });
   }
 
   deleteNotificationCallback() {
@@ -197,6 +215,20 @@ class Service extends EventEmitter {
   checkNotificationCallback() {
     return new Promise((fulfill, reject) => {
       this.get('/notification/callback').then((dataAndResponse) => {
+        if (dataAndResponse.resp.statusCode === 200) {
+          fulfill(dataAndResponse.data);
+        } else {
+          reject(dataAndResponse.resp.statusCode);
+        }
+      }).catch((err) => {
+        reject(err);
+      });
+    });
+  }
+
+  pullNotification() {
+    return new Promise((fulfill, reject) => {
+      this.get('/notification/pull').then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 200) {
           fulfill(dataAndResponse.data);
         } else {
