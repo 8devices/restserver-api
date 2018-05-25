@@ -288,6 +288,7 @@ describe('Rest API interface', () => {
         service.stop();
         setTimeout(() => {
           expect(pulled).to.equal(false);
+          nock.cleanAll();
           done();
         }, 300);
       });
