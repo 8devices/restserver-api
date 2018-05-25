@@ -396,7 +396,7 @@ describe('Rest API interface', () => {
     });
 
     describe('pullNotification function', () => {
-      it('should return a buffer which defines the version of REST server', () => {
+      it('should return an object with 4 properties (registrations, reg-updates, de-registrations, async-responses)', () => {
         nock(url)
           .get('/notification/pull')
           .reply(200, response.oneAsyncResponse);
