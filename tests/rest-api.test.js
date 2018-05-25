@@ -200,7 +200,7 @@ describe('Rest API interface', () => {
         this.client = new rest.Client();
         nock(url)
           .put('/notification/callback')
-          .reply(200)
+          .reply(204)
           .delete('/notification/callback')
           .reply(204);
         service.start({ polling: false });
@@ -221,7 +221,7 @@ describe('Rest API interface', () => {
       });
 
       it('should send GET requests to pull out notifications every interval of time in ms which is set by the parameter when initializing service object', () => {
-        const statusCode = 202;
+        const statusCode = 200;
         nock(url)
           .get('/notification/pull')
           .times(2)
@@ -255,7 +255,7 @@ describe('Rest API interface', () => {
       it('should shut down notification listener and stop process notifications', (done) => {
         nock(url)
           .put('/notification/callback')
-          .reply(statusCode)
+          .reply(204)
           .delete('/notification/callback')
           .reply(204);
         let recieved = false;
@@ -291,6 +291,56 @@ describe('Rest API interface', () => {
           done();
         }, 300);
       });
+    });
+
+    describe('createServer function', () => {
+      it('should create a server to listen for notifications', (done) => {
+        nock(url)
+          .delete('/notification/callback')
+          .reply(204);
+        service.createServer();
+        this.client = new rest.Client();
+        service.once('async-response', (resp) => {
+          try {
+            expect(resp).to.eql(response.readResponse['async-responses'][0]);
+            service.stop();
+            done();
+          } catch (e) {
+            service.stop();
+            done(new Error(e));
+          }
+        });
+        const args = {
+          data: response.readResponse,
+          headers: { 'Content-Type': 'application/json' },
+        };
+        this.client.put('http://localhost:5728/notification', args, () => {});
+      });
+    });
+
+    describe('registerNotificationCallback function', () => {
+      it('should return an object with empty buffer', () => {
+        nock(url)
+          .put('/notification/callback')
+          .reply(204, response.registerCallback);
+        return service.registerNotificationCallback().then((resp) => {
+          expect(typeof resp).to.equal('object');
+          expect(resp.length).to.equal(0);
+        });
+      });
+
+      it('should return an error (status code number) if status code is not 204', () => {
+        nock(url)
+          .put('/notification/callback')
+          .reply(404);
+        return service.registerNotificationCallback().catch((err) => {
+          expect(typeof err).to.equal('number');
+        });
+      });
+
+      it('should return rejected promise with exception object if connection is not succesfull', () => service.registerNotificationCallback().catch((err) => {
+        expect(typeof err).to.equal('object');
+      }));
     });
 
     describe('deleteNotificationCallback function', () => {
@@ -340,6 +390,25 @@ describe('Rest API interface', () => {
       });
 
       it('should return rejected promise with exception object if connection is not succesfull', () => service.checkNotificationCallback().catch((err) => {
+        expect(typeof err).to.equal('object');
+      }));
+    });
+
+    describe('pullNotification function', () => {
+      it('should return a buffer which defines the version of REST server', () => {
+        nock(url)
+          .get('/notification/pull')
+          .reply(200, response.oneAsyncResponse);
+        return service.pullNotification().then((resp) => {
+          expect(typeof resp).to.equal('object');
+          expect(resp).to.have.property('registrations');
+          expect(resp).to.have.property('reg-updates');
+          expect(resp).to.have.property('de-registrations');
+          expect(resp).to.have.property('async-responses');
+        });
+      });
+
+      it('should return rejected promise with exception object if connection is not succesfull', () => service.pullNotification().catch((err) => {
         expect(typeof err).to.equal('object');
       }));
     });

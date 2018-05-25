@@ -229,11 +229,7 @@ class Service extends EventEmitter {
   pullNotification() {
     return new Promise((fulfill, reject) => {
       this.get('/notification/pull').then((dataAndResponse) => {
-        if (dataAndResponse.resp.statusCode === 200) {
-          fulfill(dataAndResponse.data);
-        } else {
-          reject(dataAndResponse.resp.statusCode);
-        }
+        fulfill(dataAndResponse.data);
       }).catch((err) => {
         reject(err);
       });

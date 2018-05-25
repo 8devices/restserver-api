@@ -101,6 +101,7 @@ module.exports = {
   },
   notificationCallback: { url: 'http://localhost:5728/notification', headers: {} },
   deleteCallback: Buffer.alloc(0),
+  registerCallback: Buffer.alloc(0),
   getEndpoints: [{
     name: 'threeSeven',
     type: '8dev_3700',
