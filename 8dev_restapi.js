@@ -5,6 +5,9 @@ const rest = require('node-rest-client');
 const express = require('express');
 const parser = require('body-parser');
 
+const fs = require('fs');
+const https = require('https');
+
 class Endpoint extends EventEmitter {
   constructor(service, id) {
     super();
@@ -51,9 +54,14 @@ class Endpoint extends EventEmitter {
 
   read(path, callback) {
     return new Promise((fulfill, reject) => {
+      let id;
       this.service.get(`/endpoints/${this.id}${path}`).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 202) {
-          const id = dataAndResponse.data['async-response-id'];
+          if (this.service.config.https) {
+            id = JSON.parse(dataAndResponse.data)['async-response-id'];
+          } else {
+            id = dataAndResponse.data['async-response-id'];
+          }
           this.addAsyncCallback(id, callback);
           fulfill(id);
         } else {
@@ -67,9 +75,14 @@ class Endpoint extends EventEmitter {
 
   write(path, callback, tlvBuffer) {
     return new Promise((fulfill, reject) => {
+      let id;
       this.service.put(`/endpoints/${this.id}${path}`, tlvBuffer).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 202) {
-          const id = dataAndResponse.data['async-response-id'];
+          if (this.service.config.https) {
+            id = JSON.parse(dataAndResponse.data)['async-response-id'];
+          } else {
+            id = dataAndResponse.data['async-response-id'];
+          }
           this.addAsyncCallback(id, callback);
           fulfill(id);
         } else {
@@ -83,9 +96,14 @@ class Endpoint extends EventEmitter {
 
   execute(path, callback) {
     return new Promise((fulfill, reject) => {
+      let id;
       this.service.post(`/endpoints/${this.id}${path}`).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 202) {
-          const id = dataAndResponse.data['async-response-id'];
+          if (this.service.config.https) {
+            id = JSON.parse(dataAndResponse.data)['async-response-id'];
+          } else {
+            id = dataAndResponse.data['async-response-id'];
+          }
           this.addAsyncCallback(id, callback);
           fulfill(id);
         } else {
@@ -99,9 +117,14 @@ class Endpoint extends EventEmitter {
 
   observe(path, callback) {
     return new Promise((fulfill, reject) => {
+      let id;
       this.service.put(`/subscriptions/${this.id}${path}`).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 202) {
-          const id = dataAndResponse.data['async-response-id'];
+          if (this.service.config.https) {
+            id = JSON.parse(dataAndResponse.data)['async-response-id'];
+          } else {
+            id = dataAndResponse.data['async-response-id'];
+          }
           this.observations[id] = callback;
           fulfill(id);
         } else {
@@ -119,6 +142,13 @@ class Service extends EventEmitter {
     super();
     this.config = {
       host: 'http://localhost:8888',
+      options: {
+        host: 'localhost',
+        port: '8888',
+        path: '/',
+        ca: fs.readFileSync('./certificate.pem'),
+      },
+      https: false,
       interval: 1234,
       polling: false,
       port: 5728,
@@ -186,6 +216,7 @@ class Service extends EventEmitter {
         headers: {},
       };
       const type = 'application/json';
+
       this.put('/notification/callback', data, type).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 204) {
           fulfill(dataAndResponse.data);
@@ -216,6 +247,9 @@ class Service extends EventEmitter {
     return new Promise((fulfill, reject) => {
       this.get('/notification/callback').then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 200) {
+          if (this.config.https) {
+            dataAndResponse.data = JSON.parse(dataAndResponse.data);
+          }
           fulfill(dataAndResponse.data);
         } else {
           reject(dataAndResponse.resp.statusCode);
@@ -229,6 +263,9 @@ class Service extends EventEmitter {
   pullNotification() {
     return new Promise((fulfill, reject) => {
       this.get('/notification/pull').then((dataAndResponse) => {
+        if (this.config.https) {
+          dataAndResponse.data = JSON.parse(dataAndResponse.data);
+        }
         fulfill(dataAndResponse.data);
       }).catch((err) => {
         reject(err);
@@ -240,6 +277,9 @@ class Service extends EventEmitter {
     return new Promise((fulfill, reject) => {
       this.get('/endpoints').then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 200) {
+          if (this.config.https) {
+            dataAndResponse.data = JSON.parse(dataAndResponse.data);
+          }
           fulfill(dataAndResponse.data);
         } else {
           reject(dataAndResponse.resp.statusCode);
@@ -276,68 +316,179 @@ class Service extends EventEmitter {
 
   get(path) {
     return new Promise((fulfill, reject) => {
-      const args = {
-        headers: { 'Content-Type': 'application/vnd.oma.lwm2m+tlv' },
-      };
-      const url = this.config.host + path;
-      const getRequest = this.client.get(url, args, (data, resp) => {
-        const dataAndResponse = {};
-        dataAndResponse.data = data;
-        dataAndResponse.resp = resp;
-        fulfill(dataAndResponse);
-      });
-      getRequest.on('error', (err) => {
-        reject(err);
-      });
+      if (this.config.https) {
+        const { options } = this.config;
+        options.path = path;
+        options.method = 'GET';
+
+        const getRequest = https.request(options, (res) => {
+          let data = {};
+          const response = res;
+
+          res.on('data', (chunk) => {
+            data = chunk;
+          });
+
+          res.on('end', () => {
+            const dataAndResponse = {};
+            dataAndResponse.data = data;
+            dataAndResponse.resp = response;
+            fulfill(dataAndResponse);
+          });
+        });
+
+        getRequest.on('error', (err) => {
+          reject(err);
+        });
+        getRequest.end();
+      } else if (!this.config.https) {
+        const url = this.config.host + path;
+
+        const getRequest = this.client.get(url, (data, resp) => {
+          const dataAndResponse = {};
+          dataAndResponse.data = data;
+          dataAndResponse.resp = resp;
+          fulfill(dataAndResponse);
+        });
+        getRequest.on('error', (err) => {
+          reject(err);
+        });
+      }
     });
   }
 
   put(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
-      const args = {
-        headers: { 'Content-Type': type },
-        data: argument,
-      };
-      const url = this.config.host + path;
-      const putRequest = this.client.put(url, args, (data, resp) => {
-        const dataAndResponse = {};
-        dataAndResponse.data = data;
-        dataAndResponse.resp = resp;
-        fulfill(dataAndResponse);
-      });
-      putRequest.on('error', (err) => {
-        reject(err);
-      });
+      if (this.config.https) {
+        const { options } = this.config;
+        options.path = path;
+        options.method = 'PUT';
+        options.headers = { 'Content-Type': type };
+        const putRequest = https.request(options, (res) => {
+          let data = {};
+          const response = res;
+
+          res.on('data', (chunk) => {
+            data = chunk;
+          });
+
+          res.on('end', () => {
+            const dataAndResponse = {};
+            dataAndResponse.data = data;
+            dataAndResponse.resp = response;
+            fulfill(dataAndResponse);
+          });
+        });
+
+        if (type === 'application/json') {
+          putRequest.write(Buffer.from(JSON.stringify(argument)));
+        } else {
+          putRequest.write(argument);
+        }
+        putRequest.on('error', (err) => {
+          reject(err);
+        });
+        putRequest.end();
+      } else if (!this.config.https) {
+        const args = {
+          headers: { 'Content-Type': type },
+          data: argument,
+        };
+        const url = this.config.host + path;
+        const putRequest = this.client.put(url, args, (data, resp) => {
+          const dataAndResponse = {};
+          dataAndResponse.data = data;
+          dataAndResponse.resp = resp;
+          fulfill(dataAndResponse);
+        });
+        putRequest.on('error', (err) => {
+          reject(err);
+        });
+      }
     });
   }
 
   delete(path) {
     return new Promise((fulfill, reject) => {
-      const url = this.config.host + path;
-      const postRequest = this.client.delete(url, (data, resp) => {
-        const dataAndResponse = {};
-        dataAndResponse.data = data;
-        dataAndResponse.resp = resp;
-        fulfill(dataAndResponse);
-      });
-      postRequest.on('error', (err) => {
-        reject(err);
-      });
+      if (this.config.https) {
+        const { options } = this.config;
+        options.path = path;
+        options.method = 'DELETE';
+
+        const deleteRequest = https.request(options, (res) => {
+          let data = {};
+          const response = res;
+
+          res.on('data', (chunk) => {
+            data = chunk;
+          });
+
+          res.on('end', () => {
+            const dataAndResponse = {};
+            dataAndResponse.data = data;
+            dataAndResponse.resp = response;
+            fulfill(dataAndResponse);
+          });
+        });
+
+        deleteRequest.on('error', (err) => {
+          reject(err);
+        });
+        deleteRequest.end();
+      } else if (!this.config.https) {
+        const url = this.config.host + path;
+        const deleteRequest = this.client.delete(url, (data, resp) => {
+          const dataAndResponse = {};
+          dataAndResponse.data = data;
+          dataAndResponse.resp = resp;
+          fulfill(dataAndResponse);
+        });
+        deleteRequest.on('error', (err) => {
+          reject(err);
+        });
+      }
     });
   }
 
   post(path) {
     return new Promise((fulfill, reject) => {
-      const url = this.config.host + path;
-      const postRequest = this.client.post(url, (data, resp) => {
-        const dataAndResponse = {};
-        dataAndResponse.data = data;
-        dataAndResponse.resp = resp;
-        fulfill(dataAndResponse);
-      });
-      postRequest.on('error', (err) => {
-        reject(err);
-      });
+      if (this.config.https) {
+        const { options } = this.config;
+        options.path = path;
+        options.method = 'POST';
+
+        const postRequest = https.request(options, (res) => {
+          let data = {};
+          const response = res;
+
+          res.on('data', (chunk) => {
+            data = chunk;
+          });
+
+          res.on('end', () => {
+            const dataAndResponse = {};
+            dataAndResponse.data = data;
+            dataAndResponse.resp = response;
+            fulfill(dataAndResponse);
+          });
+        });
+
+        postRequest.on('error', (err) => {
+          reject(err);
+        });
+        postRequest.end();
+      } else if (!this.config.https) {
+        const url = this.config.host + path;
+        const postRequest = this.client.post(url, (data, resp) => {
+          const dataAndResponse = {};
+          dataAndResponse.data = data;
+          dataAndResponse.resp = resp;
+          fulfill(dataAndResponse);
+        });
+        postRequest.on('error', (err) => {
+          reject(err);
+        });
+      }
     });
   }
 
