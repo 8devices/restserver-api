@@ -5,11 +5,14 @@ const { expect } = chai;
 const rest = require('node-rest-client');
 const response = require('./rest-response');
 const restAPI = require('../8dev_restapi.js');
+const { execSync } = require('child_process');
 
 describe('Rest API interface', () => {
   const url = 'http://localhost:8888';
   const deviceName = 'threeSeven';
   const path = '/3312/0/5850';
+  execSync('openssl genrsa -out ../private.key 2048');
+  execSync('openssl req -days 365 -new -x509 -key ../private.key -out ./certificate.pem -subj \'/CN=localhost\'');
   const service = new restAPI.Service({ host: url });
   const device = new restAPI.Device(service, deviceName);
   const tlvBuffer = Buffer.from([0xe4, 0x16, 0x44, 0x00, 0x00, 0x00, 0x01]);
