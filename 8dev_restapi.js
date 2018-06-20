@@ -379,10 +379,9 @@ class Service extends EventEmitter {
             fulfill(dataAndResponse);
           });
         });
-
-        if (type === 'application/json') {
+        if (argument !== undefined && type === 'application/json') {
           putRequest.write(Buffer.from(JSON.stringify(argument)));
-        } else {
+        } else if (argument !== undefined && type === 'application/vnd.oma.lwm2m+tlv') {
           putRequest.write(argument);
         }
         putRequest.on('error', (err) => {
