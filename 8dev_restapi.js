@@ -5,7 +5,6 @@ const rest = require('node-rest-client');
 const express = require('express');
 const parser = require('body-parser');
 
-const fs = require('fs');
 const https = require('https');
 
 class Endpoint extends EventEmitter {
