@@ -146,7 +146,7 @@ class Service extends EventEmitter {
         host: 'localhost',
         port: '8888',
         path: '/',
-        ca: fs.readFileSync('./certificate.pem'),
+        ca: '',
       },
       https: false,
       interval: 1234,
@@ -455,6 +455,7 @@ class Service extends EventEmitter {
         const { options } = this.config;
         options.path = path;
         options.method = 'POST';
+        options.headers = 'application/vnd.oma.lwm2m+tlv';
 
         const postRequest = https.request(options, (res) => {
           let data = {};
