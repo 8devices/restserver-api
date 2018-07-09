@@ -221,12 +221,12 @@ describe('Rest API interface', () => {
       });
     });
 
-    describe('stopObserve function', () => {
+    describe('cancelObserve function', () => {
       it('should return an object with empty buffer', () => {
         nock(url)
           .delete(`/subscriptions/${deviceName}${path}`)
           .reply(204, response.deleteCallback);
-        return device.stopObserve(path).then((resp) => {
+        return device.cancelObserve(path).then((resp) => {
           expect(typeof resp).to.equal('object');
           expect(resp.length).to.equal(0);
         });
@@ -236,13 +236,13 @@ describe('Rest API interface', () => {
         nock(url)
           .delete(`/subscriptions/${deviceName}${path}`)
           .reply(404);
-        return device.stopObserve(path).catch((err) => {
+        return device.cancelObserve(path).catch((err) => {
           expect(typeof err).to.equal('number');
         });
       });
 
       it('should return rejected promise with exception object if connection is not succesfull', (done) => {
-        device.stopObserve(path)
+        device.cancelObserve(path)
           .catch((err) => {
             expect(typeof err).to.equal('object');
             done();

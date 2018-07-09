@@ -113,7 +113,7 @@ class Endpoint extends EventEmitter {
     });
   }
 
-  stopObserve(path) {
+  cancelObserve(path) {
     return new Promise((fulfill, reject) => {
       this.service.delete(`/subscriptions/${this.id}${path}`).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 204) {
