@@ -395,26 +395,16 @@ describe('Rest API interface', () => {
     });
 
     describe('deleteNotificationCallback function', () => {
-      it('should return an object with empty buffer', () => {
+      it('should return status code if connection is successful', () => {
         nock(url)
           .delete('/notification/callback')
           .reply(204, response.deleteCallback);
         return service.deleteNotificationCallback().then((resp) => {
-          expect(typeof resp).to.equal('object');
-          expect(resp.length).to.equal(0);
+          expect(typeof resp).to.equal('number');
         });
       });
 
-      it('should return an error (status code number) if status code is not 204', () => {
-        nock(url)
-          .delete('/notification/callback')
-          .reply(404);
-        return service.deleteNotificationCallback().catch((err) => {
-          expect(typeof err).to.equal('number');
-        });
-      });
-
-      it('should return rejected promise with exception object if connection is not succesfull', (done) => {
+      it('should return rejected promise with exception object if connection is not successful', (done) => {
         service.deleteNotificationCallback()
           .catch((err) => {
             expect(typeof err).to.equal('object');

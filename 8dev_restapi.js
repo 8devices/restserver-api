@@ -173,15 +173,22 @@ class Service extends EventEmitter {
   }
 
   stop() {
-    if (this.server !== undefined) {
-      this.server.close();
-      this.server = undefined;
-      this.deleteNotificationCallback();
-    }
-    if (this.pollTimer !== undefined) {
-      clearInterval(this.pollTimer);
-      this.pollTimer = undefined;
-    }
+    return new Promise((fulfill, reject) => {
+      if (this.server !== undefined) {
+        this.server.close();
+        this.server = undefined;
+        this.deleteNotificationCallback().then(() => {
+          fulfill();
+        }).catch((err) => {
+          reject(err);
+        });
+      }
+      if (this.pollTimer !== undefined) {
+        clearInterval(this.pollTimer);
+        this.pollTimer = undefined;
+        fulfill();
+      }
+    });
   }
 
   createServer() {
@@ -214,11 +221,10 @@ class Service extends EventEmitter {
   deleteNotificationCallback() {
     return new Promise((fulfill, reject) => {
       this.delete('/notification/callback').then((dataAndResponse) => {
-        if (dataAndResponse.resp.statusCode === 204) {
-          fulfill(dataAndResponse.data);
-        } else {
-          reject(dataAndResponse.resp.statusCode);
-        }
+        // Promise is fulfilled with any status code.
+        // 204 means callback will be succesfully removed.
+        // 404 means callback will not be removed because it was not registered or found.
+        fulfill(dataAndResponse.resp.statusCode);
       }).catch((err) => {
         reject(err);
       });
