@@ -116,11 +116,10 @@ class Endpoint extends EventEmitter {
   cancelObserve(path) {
     return new Promise((fulfill, reject) => {
       this.service.delete(`/subscriptions/${this.id}${path}`).then((dataAndResponse) => {
-        if (dataAndResponse.resp.statusCode === 204) {
-          fulfill(dataAndResponse.data);
-        } else {
-          reject(dataAndResponse.resp.statusCode);
-        }
+        // Promise is fulfilled with any status code.
+        // 204 means observation will be succesfully cancelled.
+        // 404 means observation will not be deleted because it was not registered or found.
+        fulfill(dataAndResponse.resp.statusCode);
       }).catch((err) => {
         reject(err);
       });
