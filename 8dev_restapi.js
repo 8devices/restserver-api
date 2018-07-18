@@ -173,22 +173,19 @@ class Service extends EventEmitter {
   }
 
   stop() {
-    return new Promise((fulfill, reject) => {
-      if (this.server !== undefined) {
-        this.server.close();
-        this.server = undefined;
-        this.deleteNotificationCallback().then(() => {
-          fulfill();
-        }).catch((err) => {
-          reject(err);
-        });
-      }
-      if (this.pollTimer !== undefined) {
-        clearInterval(this.pollTimer);
-        this.pollTimer = undefined;
-        fulfill();
-      }
-    });
+    const promises = [];
+
+    if (this.server !== undefined) {
+      this.server.close();
+      this.server = undefined;
+      promises.push(this.deleteNotificationCallback());
+    }
+    if (this.pollTimer !== undefined) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = undefined;
+    }
+
+    return Promise.all(promises);
   }
 
   createServer() {
