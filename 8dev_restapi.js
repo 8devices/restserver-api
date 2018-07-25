@@ -148,10 +148,15 @@ class Service extends EventEmitter {
         ca: '',
       },
       https: false,
+      authentication: false,
+      username: '',
+      password: '',
       interval: 1234,
       polling: false,
       port: 5728,
     };
+    this.authenticationToken = '';
+    this.tokenValidation = 3600;
     this.configure(opts);
     this.client = new rest.Client();
     this.endpoints = [];
@@ -167,37 +172,67 @@ class Service extends EventEmitter {
   }
 
   start(opts) {
-    this.stop();
+    const promises = [];
+
+    promises.push(this.stop());
+
     if (opts !== undefined) {
       this.configure(opts);
     }
-    if (!this.config.polling) {
-      this.createServer();
-      this.registerNotificationCallback()
-        .catch((err) => {
-          console.error(`Failed to set notification callback: ${err}`);
-        });
-    } else {
-      this.pollTimer = setInterval(() => {
-        this.pullNotification().then((data) => {
-          this._processEvents(data);
-        }).catch((err) => {
-          console.error(`Failed to pull notifications: ${err}`);
-        });
-      }, this.config.interval);
+
+    if (this.config.authentication) {
+      promises.push(this.authenticate());
+      Promise.all(promises).then((data) => {
+        this.authenticationToken = data[1].access_token;
+        this.tokenValidation = data[1].expires_in - 1;
+        this.authenticateTimer = setInterval(() => {
+          this.authenticate().then((newData) => {
+            this.authenticationToken = newData.access_token;
+          }).catch((err) => {
+            console.error(`Failed to authenticate user: ${err}`);
+          });
+        }, this.tokenValidation * 1000);
+      }).catch((err) => {
+        console.error(`Failed to authenticate user: ${err}`);
+      });
     }
+
+    Promise.all(promises).then(() => {
+      if (!this.config.polling) {
+        this.createServer();
+        this.registerNotificationCallback()
+          .catch((err) => {
+            console.error(`Failed to set notification callback: ${err}`);
+          });
+      } else {
+        this.pollTimer = setInterval(() => {
+          this.pullNotification().then((data) => {
+            this._processEvents(data);
+          }).catch((err) => {
+            console.error(`Failed to pull notifications: ${err}`);
+          });
+        }, this.config.interval);
+      }
+    });
   }
 
   stop() {
+    const promises = [];
+
+    if (this.authenticateTimer !== undefined) {
+      clearInterval(this.authenticateTimer);
+    }
     if (this.server !== undefined) {
       this.server.close();
       this.server = undefined;
-      this.deleteNotificationCallback();
+      promises.push(this.deleteNotificationCallback());
     }
     if (this.pollTimer !== undefined) {
       clearInterval(this.pollTimer);
       this.pollTimer = undefined;
     }
+
+    return Promise.all(promises);
   }
 
   createServer() {
@@ -206,6 +241,26 @@ class Service extends EventEmitter {
       resp.send();
     });
     this.server = this.express.listen(this.config.port);
+  }
+
+  authenticate() {
+    return new Promise((fulfill, reject) => {
+      const data = {
+        name: this.config.username,
+        secret: this.config.password
+      };
+      const type = 'application/json';
+
+      this.post('/authenticate', data, type).then((dataAndResponse) => {
+        if (dataAndResponse.resp.statusCode === 201) {
+          fulfill(dataAndResponse.data);
+        } else {
+          reject(dataAndResponse.resp.statusCode);
+        }
+      }).catch((err) => {
+        reject(err);
+      });
+    });
   }
 
   registerNotificationCallback() {
@@ -319,6 +374,9 @@ class Service extends EventEmitter {
         const { options } = this.config;
         options.path = path;
         options.method = 'GET';
+        if (this.config.authentication) {
+          options.headers.Authorization = `Bearer ${this.authenticationToken}`;
+        }
 
         const getRequest = https.request(options, (res) => {
           let data = {};
@@ -342,8 +400,11 @@ class Service extends EventEmitter {
         getRequest.end();
       } else if (!this.config.https) {
         const url = this.config.host + path;
-
-        const getRequest = this.client.get(url, (data, resp) => {
+        const args = {};
+        if (this.config.authentication) {
+          args.headers.Authorization = `Bearer ${this.authenticationToken}`;
+        }
+        const getRequest = this.client.get(url, args, (data, resp) => {
           const dataAndResponse = {};
           dataAndResponse.data = data;
           dataAndResponse.resp = resp;
@@ -363,6 +424,10 @@ class Service extends EventEmitter {
         options.path = path;
         options.method = 'PUT';
         options.headers = { 'Content-Type': type };
+        if (this.config.authentication) {
+          options.headers.Authorization = `Bearer ${this.authenticationToken}`;
+        }
+
         const putRequest = https.request(options, (res) => {
           let data = {};
           const response = res;
@@ -388,11 +453,14 @@ class Service extends EventEmitter {
         });
         putRequest.end();
       } else if (!this.config.https) {
+        const url = this.config.host + path;
         const args = {
           headers: { 'Content-Type': type },
           data: argument,
         };
-        const url = this.config.host + path;
+        if (this.config.authentication) {
+          args.headers.Authorization = `Bearer ${this.authenticationToken}`;
+        }
         const putRequest = this.client.put(url, args, (data, resp) => {
           const dataAndResponse = {};
           dataAndResponse.data = data;
@@ -412,6 +480,9 @@ class Service extends EventEmitter {
         const { options } = this.config;
         options.path = path;
         options.method = 'DELETE';
+        if (this.config.authentication) {
+          options.headers.Authorization = `Bearer ${this.authenticationToken}`;
+        }
 
         const deleteRequest = https.request(options, (res) => {
           let data = {};
@@ -435,7 +506,11 @@ class Service extends EventEmitter {
         deleteRequest.end();
       } else if (!this.config.https) {
         const url = this.config.host + path;
-        const deleteRequest = this.client.delete(url, (data, resp) => {
+        const args = {};
+        if (this.config.authentication) {
+          args.headers.Authorization = `Bearer ${this.authenticationToken}`;
+        }
+        const deleteRequest = this.client.delete(url, args, (data, resp) => {
           const dataAndResponse = {};
           dataAndResponse.data = data;
           dataAndResponse.resp = resp;
@@ -448,13 +523,16 @@ class Service extends EventEmitter {
     });
   }
 
-  post(path) {
+  post(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
       if (this.config.https) {
         const { options } = this.config;
         options.path = path;
         options.method = 'POST';
-        options.headers = 'application/vnd.oma.lwm2m+tlv';
+        options.headers = { 'Content-Type': type };
+        if (this.config.authentication) {
+          options.headers.Authorization = `Bearer ${this.authenticationToken}`;
+        }
 
         const postRequest = https.request(options, (res) => {
           let data = {};
@@ -478,7 +556,14 @@ class Service extends EventEmitter {
         postRequest.end();
       } else if (!this.config.https) {
         const url = this.config.host + path;
-        const postRequest = this.client.post(url, (data, resp) => {
+        const args = {
+          headers: { 'Content-Type': type },
+          data: argument,
+        };
+        if (this.config.authentication) {
+          args.headers.Authorization = `Bearer ${this.authenticationToken}`;
+        }
+        const postRequest = this.client.post(url, args, (data, resp) => {
           const dataAndResponse = {};
           dataAndResponse.data = data;
           dataAndResponse.resp = resp;

@@ -291,17 +291,21 @@ describe('Rest API interface', () => {
           recieved = true;
         });
         service.start({ polling: false });
-        service.stop();
-        const args = {
+        
+        setTimeout(() => {
+			service.stop();
+			const args = {
           data: response.readResponse,
           headers: { 'Content-Type': 'application/json' },
         };
-        const sendNotification = this.client.put('http://localhost:5728/notification', args, () => {});
+        const sendNotification = this.client.put('http://localhost:5728/notification', args, () => {console.log("AYAYAYAYAYAYAYAYAY")});
         sendNotification.on('error', (err) => {
           expect(typeof err).to.equal('object');
           expect(recieved).to.equal(false);
           done();
         });
+		}, 1500);
+        
       });
 
       it('should stop sending GET requests for notification pulling', (done) => {
@@ -312,7 +316,7 @@ describe('Rest API interface', () => {
         service.on('async-response', () => {
           pulled = true;
         });
-        service.start({ polling: true, interval: 200 });
+        service.start({ polling: true, interval: 800 });
         service.stop();
         setTimeout(() => {
           expect(pulled).to.equal(false);
