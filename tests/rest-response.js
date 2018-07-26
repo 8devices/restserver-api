@@ -1,4 +1,8 @@
 module.exports = {
+  authentication: {
+    access_token: 'eyJ0eXMiJ9.eyJppbiJ9.2HBtDz-bzdTPcYu-rNbwG-J9NC3P-f7kT6_YsNA',
+    expires_in: 3600
+  },
   endpoints: [
     {
       name: 'threeEight', type: '8dev_3800', status: 'ACTIVE', q: true,

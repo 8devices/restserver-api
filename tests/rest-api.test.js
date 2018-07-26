@@ -291,21 +291,20 @@ describe('Rest API interface', () => {
           recieved = true;
         });
         service.start({ polling: false });
-        
+
         setTimeout(() => {
-			service.stop();
-			const args = {
-          data: response.readResponse,
-          headers: { 'Content-Type': 'application/json' },
-        };
-        const sendNotification = this.client.put('http://localhost:5728/notification', args, () => {console.log("AYAYAYAYAYAYAYAYAY")});
-        sendNotification.on('error', (err) => {
-          expect(typeof err).to.equal('object');
-          expect(recieved).to.equal(false);
-          done();
-        });
-		}, 1500);
-        
+          service.stop();
+          const args = {
+            data: response.readResponse,
+            headers: { 'Content-Type': 'application/json' },
+          };
+          const sendNotification = this.client.put('http://localhost:5728/notification', args, () => {});
+          sendNotification.on('error', (err) => {
+            expect(typeof err).to.equal('object');
+            expect(recieved).to.equal(false);
+            done();
+          });
+        }, 1500);
       });
 
       it('should stop sending GET requests for notification pulling', (done) => {
@@ -347,6 +346,35 @@ describe('Rest API interface', () => {
           headers: { 'Content-Type': 'application/json' },
         };
         this.client.put('http://localhost:5728/notification', args, () => {});
+      });
+    });
+
+    describe('authenticate function', () => {
+      it('should return access token and its expiry time', () => {
+        nock(url)
+          .post('/authenticate')
+          .reply(201, response.authentication);
+        return service.authenticate().then((resp) => {
+          expect(resp).to.have.property('access_token');
+          expect(resp).to.have.property('expires_in');
+        });
+      });
+
+      it('should return an error (status code number) if status code is not 201', () => {
+        nock(url)
+          .post('/authenticate')
+          .reply(400);
+        return service.authenticate().catch((err) => {
+          expect(typeof err).to.equal('number');
+        });
+      });
+
+      it('should return rejected promise with exception object if connection is not succesfull', (done) => {
+        service.authenticate()
+          .catch((err) => {
+            expect(typeof err).to.equal('object');
+            done();
+          });
       });
     });
 
