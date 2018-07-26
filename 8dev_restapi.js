@@ -173,7 +173,7 @@ class Service extends EventEmitter {
 
   start(opts) {
     const promises = [];
-    
+
     if (opts !== undefined) {
       this.configure(opts);
     }
