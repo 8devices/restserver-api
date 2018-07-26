@@ -4,7 +4,6 @@ const EventEmitter = require('events');
 const rest = require('node-rest-client');
 const express = require('express');
 const parser = require('body-parser');
-
 const https = require('https');
 
 class Endpoint extends EventEmitter {
@@ -172,47 +171,60 @@ class Service extends EventEmitter {
   }
 
   start(opts) {
-    const promises = [];
+    return new Promise((fulfill, reject) => {
+      const promises = [];
 
-    if (opts !== undefined) {
-      this.configure(opts);
-    }
-
-    if (this.config.authentication) {
-      promises.push(this.authenticate());
-      Promise.all(promises).then((data) => {
-        this.authenticationToken = data[0].access_token;
-        this.tokenValidation = data[0].expires_in - 1;
-        this.authenticateTimer = setInterval(() => {
-          this.authenticate().then((newData) => {
-            this.authenticationToken = newData.access_token;
-          }).catch((err) => {
-            console.error(`Failed to authenticate user: ${err}`);
-          });
-        }, this.tokenValidation * 1000);
-      }).catch((err) => {
-        console.error(`Failed to authenticate user: ${err}`);
-      });
-    }
-
-    promises.push(this.stop());
-
-    Promise.all(promises).then(() => {
-      if (!this.config.polling) {
-        this.createServer();
-        this.registerNotificationCallback()
-          .catch((err) => {
-            console.error(`Failed to set notification callback: ${err}`);
-          });
-      } else {
-        this.pollTimer = setInterval(() => {
-          this.pullNotification().then((data) => {
-            this._processEvents(data);
-          }).catch((err) => {
-            console.error(`Failed to pull notifications: ${err}`);
-          });
-        }, this.config.interval);
+      if (opts !== undefined) {
+        this.configure(opts);
       }
+
+      if (this.config.authentication) {
+        promises.push(this.authenticate().catch((err) => {
+          console.error(`Failed to authenticate: ${err}`);
+          reject(err);
+        }));
+        Promise.all(promises).then((data) => {
+          this.authenticationToken = data[0].access_token;
+          this.tokenValidation = data[0].expires_in - 1;
+          this.authenticateTimer = setInterval(() => {
+            this.authenticate().then((newData) => {
+              this.authenticationToken = newData.access_token;
+            }).catch((err) => {
+              console.error(`Failed to authenticate user: ${err}`);
+            });
+          }, this.tokenValidation * 1000);
+        }).catch((err) => {
+          console.error(`Failed to authenticate user: ${err}`);
+        });
+      }
+
+      promises.push(this.stop());
+
+      Promise.all(promises).then(() => {
+        const notificationMethodPomises = [];
+
+        if (!this.config.polling) {
+          notificationMethodPomises.push(this.createServer().catch((err) => {
+            console.error(`Failed to create socket listener: ${err}`);
+            reject(err);
+          }));
+          notificationMethodPomises.push(this.registerNotificationCallback().catch((err) => {
+            console.error(`Failed to set notification callback: ${err}`);
+            reject(err);
+          }));
+        } else {
+          this.pollTimer = setInterval(() => {
+            this.pullNotification().then((data) => {
+              this._processEvents(data);
+            }).catch((err) => {
+              console.error(`Failed to pull notifications: ${err}`);
+            });
+          }, this.config.interval);
+        }
+        Promise.all(notificationMethodPomises).then(() => {
+          fulfill();
+        });
+      });
     });
   }
 
@@ -236,11 +248,18 @@ class Service extends EventEmitter {
   }
 
   createServer() {
-    this.express.put('/notification', (req, resp) => {
-      this._processEvents(req.body);
-      resp.send();
+    return new Promise((fulfill, reject) => {
+      this.express.put('/notification', (req, resp) => {
+        this._processEvents(req.body);
+        resp.send();
+      });
+      this.server = this.express.listen(this.config.port, () => {
+        fulfill();
+      });
+      this.server.on('error', (err) => {
+        reject(err);
+      });
     });
-    this.server = this.express.listen(this.config.port);
   }
 
   authenticate() {
