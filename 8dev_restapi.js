@@ -173,9 +173,7 @@ class Service extends EventEmitter {
 
   start(opts) {
     const promises = [];
-
-    promises.push(this.stop());
-
+    
     if (opts !== undefined) {
       this.configure(opts);
     }
@@ -183,8 +181,8 @@ class Service extends EventEmitter {
     if (this.config.authentication) {
       promises.push(this.authenticate());
       Promise.all(promises).then((data) => {
-        this.authenticationToken = data[1].access_token;
-        this.tokenValidation = data[1].expires_in - 1;
+        this.authenticationToken = data[0].access_token;
+        this.tokenValidation = data[0].expires_in - 1;
         this.authenticateTimer = setInterval(() => {
           this.authenticate().then((newData) => {
             this.authenticationToken = newData.access_token;
@@ -196,6 +194,8 @@ class Service extends EventEmitter {
         console.error(`Failed to authenticate user: ${err}`);
       });
     }
+
+    promises.push(this.stop());
 
     Promise.all(promises).then(() => {
       if (!this.config.polling) {
@@ -253,6 +253,9 @@ class Service extends EventEmitter {
 
       this.post('/authenticate', data, type).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 201) {
+          if (this.config.https) {
+            dataAndResponse.data = JSON.parse(dataAndResponse.data);
+          }
           fulfill(dataAndResponse.data);
         } else {
           reject(dataAndResponse.resp.statusCode);
@@ -374,6 +377,7 @@ class Service extends EventEmitter {
         const { options } = this.config;
         options.path = path;
         options.method = 'GET';
+        options.headers = {};
         if (this.config.authentication) {
           options.headers.Authorization = `Bearer ${this.authenticationToken}`;
         }
@@ -401,6 +405,7 @@ class Service extends EventEmitter {
       } else if (!this.config.https) {
         const url = this.config.host + path;
         const args = {};
+        args.headers = {};
         if (this.config.authentication) {
           args.headers.Authorization = `Bearer ${this.authenticationToken}`;
         }
@@ -443,11 +448,14 @@ class Service extends EventEmitter {
             fulfill(dataAndResponse);
           });
         });
-        if (argument !== undefined && type === 'application/json') {
-          putRequest.write(Buffer.from(JSON.stringify(argument)));
-        } else if (argument !== undefined && type === 'application/vnd.oma.lwm2m+tlv') {
-          putRequest.write(argument);
+        if (argument !== undefined) {
+          if (type === 'application/json') {
+            putRequest.write(Buffer.from(JSON.stringify(argument)));
+          } else if (type === 'application/vnd.oma.lwm2m+tlv') {
+            putRequest.write(argument);
+          }
         }
+
         putRequest.on('error', (err) => {
           reject(err);
         });
@@ -480,6 +488,7 @@ class Service extends EventEmitter {
         const { options } = this.config;
         options.path = path;
         options.method = 'DELETE';
+        options.headers = {};
         if (this.config.authentication) {
           options.headers.Authorization = `Bearer ${this.authenticationToken}`;
         }
@@ -507,6 +516,7 @@ class Service extends EventEmitter {
       } else if (!this.config.https) {
         const url = this.config.host + path;
         const args = {};
+        args.headers = {};
         if (this.config.authentication) {
           args.headers.Authorization = `Bearer ${this.authenticationToken}`;
         }
@@ -549,6 +559,13 @@ class Service extends EventEmitter {
             fulfill(dataAndResponse);
           });
         });
+        if (argument !== undefined) {
+          if (type === 'application/json') {
+            postRequest.write(Buffer.from(JSON.stringify(argument)));
+          } else if (type === 'application/vnd.oma.lwm2m+tlv') {
+            postRequest.write(argument);
+          }
+        }
 
         postRequest.on('error', (err) => {
           reject(err);
