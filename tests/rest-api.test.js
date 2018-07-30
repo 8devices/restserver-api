@@ -309,9 +309,7 @@ describe('Rest API interface', () => {
         service.on('async-response', () => {
           recieved = true;
         });
-        service.start({ polling: false });
-
-        setTimeout(() => {
+        service.start({ polling: false }).then(() => {
           service.stop();
           const args = {
             data: response.readResponse,
@@ -323,7 +321,7 @@ describe('Rest API interface', () => {
             expect(recieved).to.equal(false);
             done();
           });
-        }, 1500);
+        });
       });
 
       it('should stop sending GET requests for notification pulling', (done) => {
@@ -334,8 +332,9 @@ describe('Rest API interface', () => {
         service.on('async-response', () => {
           pulled = true;
         });
-        service.start({ polling: true, interval: 800 });
-        service.stop();
+        service.start({ polling: true, interval: 200 }).then(() => {
+          service.stop();
+        });
         setTimeout(() => {
           expect(pulled).to.equal(false);
           done();
