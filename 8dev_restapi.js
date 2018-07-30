@@ -250,12 +250,8 @@ class Service extends EventEmitter {
         this._processEvents(req.body);
         resp.send();
       });
-      this.server = this.express.listen(this.config.port, () => {
-        fulfill();
-      });
-      this.server.on('error', (err) => {
-        reject(err);
-      });
+      this.server = this.express.listen(this.config.port, fulfill);
+      this.server.on('error', reject);
     });
   }
 
