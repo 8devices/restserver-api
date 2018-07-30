@@ -199,15 +199,17 @@ class Service extends EventEmitter {
           reject(err);
         }));
         Promise.all(promises).then((data) => {
-          this.authenticationToken = data[0].access_token;
-          this.tokenValidation = data[0].expires_in - 1;
-          this.authenticateTimer = setInterval(() => {
-            this.authenticate().then((newData) => {
-              this.authenticationToken = newData.access_token;
-            }).catch((err) => {
-              console.error(`Failed to authenticate user: ${err}`);
-            });
-          }, this.tokenValidation * 1000);
+          if (data[0] !== undefined) {
+            this.authenticationToken = data[0].access_token;
+            this.tokenValidation = data[0].expires_in - 1;
+            this.authenticateTimer = setInterval(() => {
+              this.authenticate().then((newData) => {
+                this.authenticationToken = newData.access_token;
+              }).catch((err) => {
+                console.error(`Failed to authenticate user: ${err}`);
+              });
+            }, this.tokenValidation * 1000);
+          }
         }).catch((err) => {
           console.error(`Failed to authenticate user: ${err}`);
         });
