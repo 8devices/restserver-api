@@ -4,7 +4,6 @@ const EventEmitter = require('events');
 const rest = require('node-rest-client');
 const express = require('express');
 const parser = require('body-parser');
-const https = require('https');
 const ip = require('ip');
 
 class Endpoint extends EventEmitter {
@@ -53,14 +52,9 @@ class Endpoint extends EventEmitter {
 
   read(path, callback) {
     return new Promise((fulfill, reject) => {
-      let id;
       this.service.get(`/endpoints/${this.id}${path}`).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 202) {
-          if (this.service.config.https) {
-            id = JSON.parse(dataAndResponse.data)['async-response-id'];
-          } else {
-            id = dataAndResponse.data['async-response-id'];
-          }
+          const id = dataAndResponse.data['async-response-id'];
           this.addAsyncCallback(id, callback);
           fulfill(id);
         } else {
@@ -74,14 +68,9 @@ class Endpoint extends EventEmitter {
 
   write(path, callback, tlvBuffer) {
     return new Promise((fulfill, reject) => {
-      let id;
       this.service.put(`/endpoints/${this.id}${path}`, tlvBuffer).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 202) {
-          if (this.service.config.https) {
-            id = JSON.parse(dataAndResponse.data)['async-response-id'];
-          } else {
-            id = dataAndResponse.data['async-response-id'];
-          }
+          const id = dataAndResponse.data['async-response-id'];
           this.addAsyncCallback(id, callback);
           fulfill(id);
         } else {
@@ -95,14 +84,9 @@ class Endpoint extends EventEmitter {
 
   execute(path, callback) {
     return new Promise((fulfill, reject) => {
-      let id;
       this.service.post(`/endpoints/${this.id}${path}`).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 202) {
-          if (this.service.config.https) {
-            id = JSON.parse(dataAndResponse.data)['async-response-id'];
-          } else {
-            id = dataAndResponse.data['async-response-id'];
-          }
+          const id = dataAndResponse.data['async-response-id'];
           this.addAsyncCallback(id, callback);
           fulfill(id);
         } else {
@@ -116,14 +100,9 @@ class Endpoint extends EventEmitter {
 
   observe(path, callback) {
     return new Promise((fulfill, reject) => {
-      let id;
       this.service.put(`/subscriptions/${this.id}${path}`).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 202) {
-          if (this.service.config.https) {
-            id = JSON.parse(dataAndResponse.data)['async-response-id'];
-          } else {
-            id = dataAndResponse.data['async-response-id'];
-          }
+          const id = dataAndResponse.data['async-response-id'];
           this.observations[id] = callback;
           fulfill(id);
         } else {
@@ -154,13 +133,7 @@ class Service extends EventEmitter {
     super();
     this.config = {
       host: 'http://localhost:8888',
-      options: {
-        host: 'localhost',
-        port: '8888',
-        path: '/',
-        ca: '',
-      },
-      https: false,
+      ca: '',
       authentication: false,
       username: '',
       password: '',
@@ -172,7 +145,7 @@ class Service extends EventEmitter {
     this.tokenValidation = 3600;
     this.configure(opts);
     this.ipAddress = ip.address();
-    this.client = new rest.Client();
+    this.configureNodeRestClient();
     this.endpoints = [];
     this.addTlvSerializer();
     this.express = express();
@@ -183,6 +156,13 @@ class Service extends EventEmitter {
     Object.keys(opts).forEach((opt) => {
       this.config[opt] = opts[opt];
     });
+  }
+
+  configureNodeRestClient() {
+    const opts = {
+      ca: this.config.ca
+    };
+    this.client = new rest.Client({ connection: opts });
   }
 
   start(opts) {
@@ -289,9 +269,6 @@ class Service extends EventEmitter {
 
       this.post('/authenticate', data, type).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 201) {
-          if (this.config.https) {
-            dataAndResponse.data = JSON.parse(dataAndResponse.data);
-          }
           fulfill(dataAndResponse.data);
         } else {
           reject(dataAndResponse.resp.statusCode);
@@ -339,9 +316,6 @@ class Service extends EventEmitter {
     return new Promise((fulfill, reject) => {
       this.get('/notification/callback').then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 200) {
-          if (this.config.https) {
-            dataAndResponse.data = JSON.parse(dataAndResponse.data);
-          }
           fulfill(dataAndResponse.data);
         } else {
           reject(dataAndResponse.resp.statusCode);
@@ -355,9 +329,6 @@ class Service extends EventEmitter {
   pullNotification() {
     return new Promise((fulfill, reject) => {
       this.get('/notification/pull').then((dataAndResponse) => {
-        if (this.config.https) {
-          dataAndResponse.data = JSON.parse(dataAndResponse.data);
-        }
         fulfill(dataAndResponse.data);
       }).catch((err) => {
         reject(err);
@@ -369,9 +340,6 @@ class Service extends EventEmitter {
     return new Promise((fulfill, reject) => {
       this.get('/endpoints').then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 200) {
-          if (this.config.https) {
-            dataAndResponse.data = JSON.parse(dataAndResponse.data);
-          }
           fulfill(dataAndResponse.data);
         } else {
           reject(dataAndResponse.resp.statusCode);
@@ -408,223 +376,86 @@ class Service extends EventEmitter {
 
   get(path) {
     return new Promise((fulfill, reject) => {
-      if (this.config.https) {
-        const { options } = this.config;
-        options.path = path;
-        options.method = 'GET';
-        options.headers = {};
-        if (this.config.authentication) {
-          options.headers.Authorization = `Bearer ${this.authenticationToken}`;
-        }
-
-        const getRequest = https.request(options, (res) => {
-          let data = {};
-          const response = res;
-
-          res.on('data', (chunk) => {
-            data = chunk;
-          });
-
-          res.on('end', () => {
-            const dataAndResponse = {};
-            dataAndResponse.data = data;
-            dataAndResponse.resp = response;
-            fulfill(dataAndResponse);
-          });
-        });
-
-        getRequest.on('error', (err) => {
-          reject(err);
-        });
-        getRequest.end();
-      } else if (!this.config.https) {
-        const url = this.config.host + path;
-        const args = {};
-        args.headers = {};
-        if (this.config.authentication) {
-          args.headers.Authorization = `Bearer ${this.authenticationToken}`;
-        }
-        const getRequest = this.client.get(url, args, (data, resp) => {
-          const dataAndResponse = {};
-          dataAndResponse.data = data;
-          dataAndResponse.resp = resp;
-          fulfill(dataAndResponse);
-        });
-        getRequest.on('error', (err) => {
-          reject(err);
-        });
+      const url = this.config.host + path;
+      const args = {};
+      args.headers = {};
+      if (this.config.authentication) {
+        args.headers.Authorization = `Bearer ${this.authenticationToken}`;
       }
+
+      const getRequest = this.client.get(url, args, (data, resp) => {
+        const dataAndResponse = {};
+        dataAndResponse.data = data;
+        dataAndResponse.resp = resp;
+        fulfill(dataAndResponse);
+      });
+      getRequest.on('error', (err) => {
+        reject(err);
+      });
     });
   }
 
   put(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
-      if (this.config.https) {
-        const { options } = this.config;
-        options.path = path;
-        options.method = 'PUT';
-        options.headers = { 'Content-Type': type };
-        if (this.config.authentication) {
-          options.headers.Authorization = `Bearer ${this.authenticationToken}`;
-        }
-
-        const putRequest = https.request(options, (res) => {
-          let data = {};
-          const response = res;
-
-          res.on('data', (chunk) => {
-            data = chunk;
-          });
-
-          res.on('end', () => {
-            const dataAndResponse = {};
-            dataAndResponse.data = data;
-            dataAndResponse.resp = response;
-            fulfill(dataAndResponse);
-          });
-        });
-        if (argument !== undefined) {
-          if (type === 'application/json') {
-            putRequest.write(Buffer.from(JSON.stringify(argument)));
-          } else if (type === 'application/vnd.oma.lwm2m+tlv') {
-            putRequest.write(argument);
-          }
-        }
-
-        putRequest.on('error', (err) => {
-          reject(err);
-        });
-        putRequest.end();
-      } else if (!this.config.https) {
-        const url = this.config.host + path;
-        const args = {
-          headers: { 'Content-Type': type },
-          data: argument,
-        };
-        if (this.config.authentication) {
-          args.headers.Authorization = `Bearer ${this.authenticationToken}`;
-        }
-        const putRequest = this.client.put(url, args, (data, resp) => {
-          const dataAndResponse = {};
-          dataAndResponse.data = data;
-          dataAndResponse.resp = resp;
-          fulfill(dataAndResponse);
-        });
-        putRequest.on('error', (err) => {
-          reject(err);
-        });
+      const url = this.config.host + path;
+      const args = {
+        headers: { 'Content-Type': type },
+        data: argument,
+      };
+      if (this.config.authentication) {
+        args.headers.Authorization = `Bearer ${this.authenticationToken}`;
       }
+      const putRequest = this.client.put(url, args, (data, resp) => {
+        const dataAndResponse = {};
+        dataAndResponse.data = data;
+        dataAndResponse.resp = resp;
+        fulfill(dataAndResponse);
+      });
+      putRequest.on('error', (err) => {
+        reject(err);
+      });
     });
   }
 
   delete(path) {
     return new Promise((fulfill, reject) => {
-      if (this.config.https) {
-        const { options } = this.config;
-        options.path = path;
-        options.method = 'DELETE';
-        options.headers = {};
-        if (this.config.authentication) {
-          options.headers.Authorization = `Bearer ${this.authenticationToken}`;
-        }
-
-        const deleteRequest = https.request(options, (res) => {
-          let data = {};
-          const response = res;
-
-          res.on('data', (chunk) => {
-            data = chunk;
-          });
-
-          res.on('end', () => {
-            const dataAndResponse = {};
-            dataAndResponse.data = data;
-            dataAndResponse.resp = response;
-            fulfill(dataAndResponse);
-          });
-        });
-
-        deleteRequest.on('error', (err) => {
-          reject(err);
-        });
-        deleteRequest.end();
-      } else if (!this.config.https) {
-        const url = this.config.host + path;
-        const args = {};
-        args.headers = {};
-        if (this.config.authentication) {
-          args.headers.Authorization = `Bearer ${this.authenticationToken}`;
-        }
-        const deleteRequest = this.client.delete(url, args, (data, resp) => {
-          const dataAndResponse = {};
-          dataAndResponse.data = data;
-          dataAndResponse.resp = resp;
-          fulfill(dataAndResponse);
-        });
-        deleteRequest.on('error', (err) => {
-          reject(err);
-        });
+      const url = this.config.host + path;
+      const args = {};
+      args.headers = {};
+      if (this.config.authentication) {
+        args.headers.Authorization = `Bearer ${this.authenticationToken}`;
       }
+      const deleteRequest = this.client.delete(url, args, (data, resp) => {
+        const dataAndResponse = {};
+        dataAndResponse.data = data;
+        dataAndResponse.resp = resp;
+        fulfill(dataAndResponse);
+      });
+      deleteRequest.on('error', (err) => {
+        reject(err);
+      });
     });
   }
 
   post(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
-      if (this.config.https) {
-        const { options } = this.config;
-        options.path = path;
-        options.method = 'POST';
-        options.headers = { 'Content-Type': type };
-        if (this.config.authentication) {
-          options.headers.Authorization = `Bearer ${this.authenticationToken}`;
-        }
-
-        const postRequest = https.request(options, (res) => {
-          let data = {};
-          const response = res;
-
-          res.on('data', (chunk) => {
-            data = chunk;
-          });
-
-          res.on('end', () => {
-            const dataAndResponse = {};
-            dataAndResponse.data = data;
-            dataAndResponse.resp = response;
-            fulfill(dataAndResponse);
-          });
-        });
-        if (argument !== undefined) {
-          if (type === 'application/json') {
-            postRequest.write(Buffer.from(JSON.stringify(argument)));
-          } else if (type === 'application/vnd.oma.lwm2m+tlv') {
-            postRequest.write(argument);
-          }
-        }
-
-        postRequest.on('error', (err) => {
-          reject(err);
-        });
-        postRequest.end();
-      } else if (!this.config.https) {
-        const url = this.config.host + path;
-        const args = {
-          headers: { 'Content-Type': type },
-          data: argument,
-        };
-        if (this.config.authentication) {
-          args.headers.Authorization = `Bearer ${this.authenticationToken}`;
-        }
-        const postRequest = this.client.post(url, args, (data, resp) => {
-          const dataAndResponse = {};
-          dataAndResponse.data = data;
-          dataAndResponse.resp = resp;
-          fulfill(dataAndResponse);
-        });
-        postRequest.on('error', (err) => {
-          reject(err);
-        });
+      const url = this.config.host + path;
+      const args = {
+        headers: { 'Content-Type': type },
+        data: argument,
+      };
+      if (this.config.authentication) {
+        args.headers.Authorization = `Bearer ${this.authenticationToken}`;
       }
+      const postRequest = this.client.post(url, args, (data, resp) => {
+        const dataAndResponse = {};
+        dataAndResponse.data = data;
+        dataAndResponse.resp = resp;
+        fulfill(dataAndResponse);
+      });
+      postRequest.on('error', (err) => {
+        reject(err);
+      });
     });
   }
 
