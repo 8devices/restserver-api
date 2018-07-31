@@ -169,46 +169,42 @@ class Service extends EventEmitter {
     return new Promise((fulfill, reject) => {
       const promises = [];
 
+      promises.push(this.stop());
+
       if (opts !== undefined) {
         this.configure(opts);
       }
 
       if (this.config.authentication) {
-        promises.push(this.authenticate().catch((err) => {
-          console.error(`Failed to authenticate: ${err}`);
-          reject(err);
-        }));
-        Promise.all(promises).then((data) => {
-          if (data[0] !== undefined) {
-            this.authenticationToken = data[0].access_token;
-            this.tokenValidation = data[0].expires_in - 1;
-            this.authenticateTimer = setInterval(() => {
-              this.authenticate().then((newData) => {
-                this.authenticationToken = newData.access_token;
-              }).catch((err) => {
-                console.error(`Failed to authenticate user: ${err}`);
-              });
-            }, this.tokenValidation * 1000);
-          }
+        const authenticatePromise = this.authenticate().then((data) => {
+          this.authenticationToken = data.access_token;
+          this.tokenValidation = data.expires_in - 1;
+          this.authenticateTimer = setInterval(() => {
+            this.authenticate().then((newData) => {
+              this.authenticationToken = newData.access_token;
+            }).catch((err) => {
+              console.error(`Failed to authenticate user: ${err}`);
+            });
+          }, this.tokenValidation * 1000);
         }).catch((err) => {
           console.error(`Failed to authenticate user: ${err}`);
+          reject(err);
         });
+        promises.push(authenticatePromise);
       }
 
-      promises.push(this.stop());
-
       Promise.all(promises).then(() => {
-        const notificationMethodPomises = [];
-
         if (!this.config.polling) {
-          notificationMethodPomises.push(this.createServer().catch((err) => {
-            console.error(`Failed to create socket listener: ${err}`);
-            reject(err);
-          }));
-          notificationMethodPomises.push(this.registerNotificationCallback().catch((err) => {
-            console.error(`Failed to set notification callback: ${err}`);
-            reject(err);
-          }));
+          this.createServer().catch((err) => {
+              console.error(`Failed to create socket listener: ${err}`);
+              reject(err);
+            }).then(() => this.registerNotificationCallback()).catch((err) => {
+              console.error(`Failed to set notification callback: ${err}`);
+              reject(err);
+            })
+            .then(() => {
+              fulfill();
+            });
         } else {
           this.pollTimer = setInterval(() => {
             this.pullNotification().then((data) => {
@@ -217,10 +213,8 @@ class Service extends EventEmitter {
               console.error(`Failed to pull notifications: ${err}`);
             });
           }, this.config.interval);
-        }
-        Promise.all(notificationMethodPomises).then(() => {
           fulfill();
-        });
+        }
       });
     });
   }
@@ -230,6 +224,7 @@ class Service extends EventEmitter {
 
     if (this.authenticateTimer !== undefined) {
       clearInterval(this.authenticateTimer);
+      this.authenticateTimer = undefined;
     }
     if (this.server !== undefined) {
       this.server.close();
