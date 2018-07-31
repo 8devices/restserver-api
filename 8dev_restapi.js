@@ -196,12 +196,12 @@ class Service extends EventEmitter {
       Promise.all(promises).then(() => {
         if (!this.config.polling) {
           this.createServer().catch((err) => {
-              console.error(`Failed to create socket listener: ${err}`);
-              reject(err);
-            }).then(() => this.registerNotificationCallback()).catch((err) => {
-              console.error(`Failed to set notification callback: ${err}`);
-              reject(err);
-            })
+            console.error(`Failed to create socket listener: ${err}`);
+            reject(err);
+          }).then(() => this.registerNotificationCallback()).catch((err) => {
+            console.error(`Failed to set notification callback: ${err}`);
+            reject(err);
+          })
             .then(() => {
               fulfill();
             });
