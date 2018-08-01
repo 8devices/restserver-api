@@ -294,6 +294,62 @@ describe('Rest API interface', () => {
           });
         });
       });
+
+      it('should authenticate and continue authenticate before authentication token expires', () => {
+        const statusCode = 201;
+        nock(url)
+          .post('/authenticate')
+          .reply(statusCode, response.firstAuthentication)
+          .post('/authenticate')
+          .reply(statusCode, response.secondAuthentication);
+        return service.start({ authentication: true, interval: 123456 }).then(() => {
+          expect(service.authenticationToken).to.equal(response.firstAuthentication.access_token);
+          return new Promise((fulfill) => {
+            setTimeout(() => {
+              expect(service.authenticationToken)
+                .to.equal(response.secondAuthentication.access_token);
+              service.stop();
+              fulfill();
+            }, response.firstAuthentication.expires_in * 1000);
+          });
+        });
+      });
+
+      it('should return rejected promise with status code if authentication is not succesfull', (done) => {
+        nock(url)
+          .post('/authenticate')
+          .reply(400);
+        service.start()
+          .catch((err) => {
+            expect(typeof err).to.equal('number');
+            done();
+          });
+      });
+
+      it('should return rejected promise with exception object if socket listener creation creation is not succesfull', () => {
+        nock(url)
+          .put('/notification/callback')
+          .reply(204);
+        return service.start({ authentication: false, polling: false, port: 9999999 })
+          .catch((err) => {
+            expect(typeof err).to.equal('object');
+            service.stop();
+          });
+      });
+
+      it('should return rejected promise with status code if notification callback registration is not succesfull', () => {
+        nock(url)
+          .put('/notification/callback')
+          .reply(400);
+        nock(url)
+          .delete('/notification/callback')
+          .reply(204);
+        return service.start({ port: 5728 })
+          .catch((err) => {
+            expect(typeof err).to.equal('number');
+            service.stop();
+          });
+      });
     });
 
     describe('stop function', () => {
@@ -309,7 +365,7 @@ describe('Rest API interface', () => {
         service.on('async-response', () => {
           recieved = true;
         });
-        service.start({ polling: false }).then(() => {
+        service.start({ polling: false, port: 5728 }).then(() => {
           service.stop();
           const args = {
             data: response.readResponse,
@@ -591,6 +647,19 @@ describe('Rest API interface', () => {
         });
       });
 
+      it('should add a header with authentication token if authentication is enabled in configuration', () => {
+        const statusCode = 202;
+        nock(url)
+          .post('/authenticate')
+          .reply(201, response.authentication)
+          .get(`/endpoints/${deviceName}${path}`)
+          .reply(statusCode, response.readRequest);
+        return service.start({ authentication: true, interval: 123456 }).then(() => service.get(`/endpoints/${deviceName}${path}`)).then(dataAndResponse => service.stop().then(() => {
+          expect(dataAndResponse.resp.req.headers).to.have.property('authorization');
+          expect(dataAndResponse.resp.req.headers.authorization.startsWith('Bearer ')).to.equal(true);
+        }));
+      });
+
       it('should reject promise when connection fails', (done) => {
         service.get(`/endpoints/${deviceName}${path}`)
           .catch((err) => {
@@ -611,6 +680,19 @@ describe('Rest API interface', () => {
           expect(dataAndResponse.data).to.have.property('async-response-id');
           expect(dataAndResponse.resp.statusCode).to.equal(statusCode);
         });
+      });
+
+      it('should add a header with authentication token if authentication is enabled in configuration', () => {
+        const statusCode = 202;
+        nock(url)
+          .post('/authenticate')
+          .reply(201, response.authentication)
+          .put(`/endpoints/${deviceName}${path}`)
+          .reply(statusCode, response.writeRequest);
+        return service.start({ authentication: true, interval: 123456 }).then(() => service.put(`/endpoints/${deviceName}${path}`)).then(dataAndResponse => service.stop().then(() => {
+          expect(dataAndResponse.resp.req.headers).to.have.property('authorization');
+          expect(dataAndResponse.resp.req.headers.authorization.startsWith('Bearer ')).to.equal(true);
+        }));
       });
 
       it('should reject promise when connection fails', (done) => {
@@ -635,6 +717,19 @@ describe('Rest API interface', () => {
         });
       });
 
+      it('should add a header with authentication token if authentication is enabled in configuration', () => {
+        const statusCode = 202;
+        nock(url)
+          .post('/authenticate')
+          .reply(201, response.authentication)
+          .delete('/notification/callback')
+          .reply(statusCode, response.deleteCallback);
+        return service.start({ authentication: true, interval: 123456 }).then(() => service.delete('/notification/callback')).then(dataAndResponse => service.stop().then(() => {
+          expect(dataAndResponse.resp.req.headers).to.have.property('authorization');
+          expect(dataAndResponse.resp.req.headers.authorization.startsWith('Bearer ')).to.equal(true);
+        }));
+      });
+
       it('should reject promise when connection fails', (done) => {
         service.delete('/notification/callback')
           .catch((err) => {
@@ -655,6 +750,19 @@ describe('Rest API interface', () => {
           expect(dataAndResponse.data).to.have.property('async-response-id');
           expect(dataAndResponse.resp.statusCode).to.equal(statusCode);
         });
+      });
+
+      it('should add a header with authentication token if authentication is enabled in configuration', () => {
+        const statusCode = 202;
+        nock(url)
+          .post('/authenticate')
+          .reply(201, response.authentication)
+          .post(`/endpoints/${deviceName}${path}`)
+          .reply(statusCode, response.executeRequest);
+        return service.start({ authentication: true, interval: 123456 }).then(() => service.post(`/endpoints/${deviceName}${path}`)).then(dataAndResponse => service.stop().then(() => {
+          expect(dataAndResponse.resp.req.headers).to.have.property('authorization');
+          expect(dataAndResponse.resp.req.headers.authorization.startsWith('Bearer ')).to.equal(true);
+        }));
       });
 
       it('should reject promise when connection fails', (done) => {
