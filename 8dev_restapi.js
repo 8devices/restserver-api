@@ -178,7 +178,7 @@ class Service extends EventEmitter {
       if (this.config.authentication) {
         const authenticatePromise = this.authenticate().then((data) => {
           this.authenticationToken = data.access_token;
-          this.tokenValidation = data.expires_in - 1;
+          this.tokenValidation = data.expires_in;
           const authenticateTime = 0.9 * (this.tokenValidation * 1000);
           this.authenticateTimer = setInterval(() => {
             this.authenticate().then((newData) => {
