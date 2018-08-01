@@ -179,13 +179,14 @@ class Service extends EventEmitter {
         const authenticatePromise = this.authenticate().then((data) => {
           this.authenticationToken = data.access_token;
           this.tokenValidation = data.expires_in - 1;
+          const authenticateTime = 0.9 * (this.tokenValidation * 1000);
           this.authenticateTimer = setInterval(() => {
             this.authenticate().then((newData) => {
               this.authenticationToken = newData.access_token;
             }).catch((err) => {
               console.error(`Failed to authenticate user: ${err}`);
             });
-          }, this.tokenValidation * 1000);
+          }, authenticateTime);
         }).catch((err) => {
           console.error(`Failed to authenticate user: ${err}`);
           reject(err);
