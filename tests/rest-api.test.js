@@ -326,7 +326,7 @@ describe('Rest API interface', () => {
           });
       });
 
-      it('should return rejected promise with exception object if socket listener creation creation is not succesfull', () => {
+      it('should return rejected promise with exception object if socket listener creation is not succesfull', () => {
         nock(url)
           .put('/notification/callback')
           .reply(204);
