@@ -19,6 +19,14 @@ describe('Rest API interface', () => {
   });
 
   describe('Endpoint interface', () => {
+    describe('disattach function', () => {
+      it('should remove itself from service endpoints array', () => {
+        const deviceWillDisattach = new restAPI.Device(service, 'willDisattach');
+        deviceWillDisattach.disattach();
+        expect(service.endpoints[deviceWillDisattach.id]).to.equal(undefined);
+      });
+    });
+
     describe('getObjects function', () => {
       it('should return an array of all endpont\'s resource paths', () => {
         nock(url)
@@ -797,6 +805,18 @@ describe('Rest API interface', () => {
         service.attachEndpoint(attachedEndpoint);
         expect(typeof service.endpoints[attachedEndpointID]).to.equal('object');
         expect(service.endpoints[attachedEndpointID].id).to.equal(attachedEndpointID);
+      });
+    });
+
+    describe('deattachEndpoint function', () => {
+      it('should remove an endpoint from service endpoints array and emit an event', (done) => {
+        const deattachedEndpointID = 'willBeDeattached';
+        const deattachedEndpoint = service.createNode(deattachedEndpointID);
+        service.on('endpoint-de-attached', () => {
+          expect(service.endpoints[deattachedEndpointID]).to.equal(undefined);
+          done();
+        });
+        service.deattachEndpoint(deattachedEndpoint);
       });
     });
   });
