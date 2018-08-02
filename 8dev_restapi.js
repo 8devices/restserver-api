@@ -32,6 +32,10 @@ class Endpoint extends EventEmitter {
     service.attachEndpoint(this);
   }
 
+  disattach() {
+    this.service.deattachEndpoint(this);
+  }
+
   getObjects() {
     return new Promise((fulfill, reject) => {
       this.service.get(`/endpoints/${this.id}`).then((dataAndResponse) => {
@@ -490,6 +494,11 @@ class Service extends EventEmitter {
 
   attachEndpoint(ep) {
     this.endpoints[ep.id] = ep;
+  }
+
+  deattachEndpoint(ep) {
+    delete this.endpoints[ep.id];
+    this.emit('endpoint-de-attached');
   }
 }
 
