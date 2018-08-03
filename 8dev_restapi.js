@@ -15,6 +15,24 @@ class Endpoint extends EventEmitter {
     this.transactions = {};
     this.observations = {};
 
+    this.service.on('register', (resp) => {
+      if (this.id === resp) {
+        this.emit('register');
+      }
+    });
+
+    this.service.on('update', (resp) => {
+      if (this.id === resp) {
+        this.emit('update');
+      }
+    });
+
+    this.service.on('deregister', (resp) => {
+      if (this.id === resp) {
+        this.emit('deregister');
+      }
+    });
+
     this.service.on('async-response', (resp) => {
       const ID = resp.id;
       const code = resp.status;
@@ -28,12 +46,6 @@ class Endpoint extends EventEmitter {
         this.observations[ID](code, data);
       }
     });
-
-    service.attachEndpoint(this);
-  }
-
-  disattach() {
-    this.service.deattachEndpoint(this);
   }
 
   getObjects() {
@@ -173,8 +185,6 @@ class Service extends EventEmitter {
     return new Promise((fulfill, reject) => {
       const promises = [];
 
-      promises.push(this.stop());
-
       if (opts !== undefined) {
         this.configure(opts);
       }
@@ -226,6 +236,18 @@ class Service extends EventEmitter {
 
   stop() {
     const promises = [];
+
+    /* promises.push(new Promise((fulfill, reject) => {
+      this.endpointCheckTimer = setInterval(() => {
+        if (Object.keys(this.endpoints).length === 0) {
+          console.log('PRIES CLEARA');
+          this.closing = true;
+          clearInterval(this.endpointCheckTimer);
+          console.log('PO CLEARO');
+          fulfill();
+        }
+      }, 50);
+    })); */
 
     if (this.authenticateTimer !== undefined) {
       clearInterval(this.authenticateTimer);
@@ -458,23 +480,17 @@ class Service extends EventEmitter {
   _processEvents(events) {
     for (let i = 0; i < events.registrations.length; i += 1) {
       const id = events.registrations[i].name;
-      if (this.endpoints[id]) {
-        this.endpoints[id].emit('register');
-      }
+      this.emit('register', id);
     }
 
     for (let i = 0; i < events['reg-updates'].length; i += 1) {
       const id = events['reg-updates'][i].name;
-      if (this.endpoints[id]) {
-        this.endpoints[id].emit('update');
-      }
+      this.emit('update', id);
     }
 
     for (let i = 0; i < events['de-registrations'].length; i += 1) {
       const id = events['de-registrations'][i].name;
-      if (this.endpoints[id]) {
-        this.endpoints[id].emit('deregister');
-      }
+      this.emit('deregister', id);
     }
 
     const responses = events['async-responses'].sort((x, y) => x.timestamp - y.timestamp);
@@ -482,23 +498,6 @@ class Service extends EventEmitter {
       const res = responses[i];
       this.emit('async-response', res);
     }
-  }
-
-  createNode(id) {
-    if (!this.endpoints[id]) {
-      this.endpoints[id] = new Endpoint(this, id);
-    }
-
-    return this.endpoints[id];
-  }
-
-  attachEndpoint(ep) {
-    this.endpoints[ep.id] = ep;
-  }
-
-  deattachEndpoint(ep) {
-    delete this.endpoints[ep.id];
-    this.emit('endpoint-de-attached');
   }
 }
 

@@ -19,14 +19,6 @@ describe('Rest API interface', () => {
   });
 
   describe('Endpoint interface', () => {
-    describe('disattach function', () => {
-      it('should remove itself from service endpoints array', () => {
-        const deviceWillDisattach = new restAPI.Device(service, 'willDisattach');
-        deviceWillDisattach.disattach();
-        expect(service.endpoints[deviceWillDisattach.id]).to.equal(undefined);
-      });
-    });
-
     describe('getObjects function', () => {
       it('should return an array of all endpont\'s resource paths', () => {
         nock(url)
@@ -787,36 +779,6 @@ describe('Rest API interface', () => {
             expect(typeof err).to.equal('object');
             done();
           });
-      });
-    });
-
-    describe('createNode function', () => {
-      it('should add a new endpoint in service endpoints array if the endpoint does not exist', () => {
-        const endpointID = 'testNode';
-        const endpoint = service.createNode(endpointID);
-        expect(typeof endpoint).to.equal('object');
-        expect(endpoint.id).to.equal(endpointID);
-        expect(service.endpoints[endpointID]).to.equal(endpoint);
-      });
-
-      it('should add endpoint to endponts array which belongs to service class', () => {
-        const attachedEndpointID = 'attachedNode';
-        const attachedEndpoint = service.createNode(attachedEndpointID);
-        service.attachEndpoint(attachedEndpoint);
-        expect(typeof service.endpoints[attachedEndpointID]).to.equal('object');
-        expect(service.endpoints[attachedEndpointID].id).to.equal(attachedEndpointID);
-      });
-    });
-
-    describe('deattachEndpoint function', () => {
-      it('should remove an endpoint from service endpoints array and emit an event', (done) => {
-        const deattachedEndpointID = 'willBeDeattached';
-        const deattachedEndpoint = service.createNode(deattachedEndpointID);
-        service.on('endpoint-de-attached', () => {
-          expect(service.endpoints[deattachedEndpointID]).to.equal(undefined);
-          done();
-        });
-        service.deattachEndpoint(deattachedEndpoint);
       });
     });
   });
