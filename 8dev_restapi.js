@@ -15,20 +15,20 @@ class Endpoint extends EventEmitter {
     this.transactions = {};
     this.observations = {};
 
-    this.service.on('register', (resp) => {
-      if (this.id === resp) {
+    this.service.on('register', (name) => {
+      if (this.id === name) {
         this.emit('register');
       }
     });
 
-    this.service.on('update', (resp) => {
-      if (this.id === resp) {
+    this.service.on('update', (name) => {
+      if (this.id === name) {
         this.emit('update');
       }
     });
 
-    this.service.on('deregister', (resp) => {
-      if (this.id === resp) {
+    this.service.on('deregister', (name) => {
+      if (this.id === name) {
         this.emit('deregister');
       }
     });
