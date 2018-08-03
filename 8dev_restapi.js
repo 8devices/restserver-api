@@ -237,18 +237,6 @@ class Service extends EventEmitter {
   stop() {
     const promises = [];
 
-    /* promises.push(new Promise((fulfill, reject) => {
-      this.endpointCheckTimer = setInterval(() => {
-        if (Object.keys(this.endpoints).length === 0) {
-          console.log('PRIES CLEARA');
-          this.closing = true;
-          clearInterval(this.endpointCheckTimer);
-          console.log('PO CLEARO');
-          fulfill();
-        }
-      }, 50);
-    })); */
-
     if (this.authenticateTimer !== undefined) {
       clearInterval(this.authenticateTimer);
       this.authenticateTimer = undefined;
