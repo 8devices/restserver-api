@@ -162,7 +162,6 @@ class Service extends EventEmitter {
     this.configure(opts);
     this.ipAddress = ip.address();
     this.configureNodeRestClient();
-    this.endpoints = [];
     this.addTlvSerializer();
     this.express = express();
     this.express.use(parser.json());
@@ -184,6 +183,8 @@ class Service extends EventEmitter {
   start(opts) {
     return new Promise((fulfill, reject) => {
       const promises = [];
+
+      promises.push(this.stop());
 
       if (opts !== undefined) {
         this.configure(opts);
