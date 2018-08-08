@@ -7,6 +7,15 @@ const parser = require('body-parser');
 const ip = require('ip');
 
 class Endpoint extends EventEmitter {
+  /**
+   * Constructor initiliazes given service object, endpoint's id
+   * and starts listening for events emited by service (when endpoint
+   * registers, updates, deregisters, sends data), handles "async
+   * responses" and emits "register", "update", "deregister" events.
+   * @constructor
+   * @param {object} service - service object
+   * @param {string} id - endpoint id
+   */
   constructor(service, id) {
     super();
 
@@ -48,6 +57,9 @@ class Endpoint extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to get all endpoint's objects
+   */
   getObjects() {
     return new Promise((fulfill, reject) => {
       this.service.get(`/endpoints/${this.id}`).then((dataAndResponse) => {
@@ -62,10 +74,22 @@ class Endpoint extends EventEmitter {
     });
   }
 
+  /**
+   * Adds a callback to transactions list.
+   * Key value is endpoint's id
+   * @private
+   * @param {string} id - endpoint id
+   * @param {function} callback -   callback which will be called when async response is recieved
+   */
   addAsyncCallback(id, callback) {
     this.transactions[id] = callback;
   }
 
+  /**
+   * Sends request to read endpoint's resource data
+   * @param {string} path - resource path
+   * @param {function} callback - callback which will be called when async response is recieved
+   */
   read(path, callback) {
     return new Promise((fulfill, reject) => {
       this.service.get(`/endpoints/${this.id}${path}`).then((dataAndResponse) => {
@@ -82,6 +106,12 @@ class Endpoint extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to write a value into endpoint's resource
+   * @param {string} path - resource path
+   * @param {function} callback - callback which will be called when async response is recieved
+   * @param {buffer} tlvBuffer - data in TLV format
+   */
   write(path, callback, tlvBuffer) {
     return new Promise((fulfill, reject) => {
       this.service.put(`/endpoints/${this.id}${path}`, tlvBuffer).then((dataAndResponse) => {
@@ -98,6 +128,11 @@ class Endpoint extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to execute endpoint's resource
+   * @param {string} path - resource path
+   * @param {function} callback - callback which will be called when async response is recieved
+   */
   execute(path, callback) {
     return new Promise((fulfill, reject) => {
       this.service.post(`/endpoints/${this.id}${path}`).then((dataAndResponse) => {
@@ -114,6 +149,11 @@ class Endpoint extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to subscribe to resource
+   * @param {string} path - resource path
+   * @param {function} callback - callback which will be called when async response is recieved
+   */
   observe(path, callback) {
     return new Promise((fulfill, reject) => {
       this.service.put(`/subscriptions/${this.id}${path}`).then((dataAndResponse) => {
@@ -130,6 +170,10 @@ class Endpoint extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to cancel subscriptions
+   * @param {string} path - resource path
+   */
   cancelObserve(path) {
     return new Promise((fulfill, reject) => {
       this.service.delete(`/subscriptions/${this.id}${path}`).then((dataAndResponse) => {
@@ -145,6 +189,14 @@ class Endpoint extends EventEmitter {
 }
 
 class Service extends EventEmitter {
+  /**
+   * Initializes default configurations.
+   * opts - options object which stores host, ca (CA certificate),
+   * authentication(true/ false), username, password, polling (true/false),
+   * port (for socket listener)
+   * @constructor
+   * @param {object} opts - options object
+   */
   constructor(opts) {
     super();
     this.config = {
@@ -167,12 +219,21 @@ class Service extends EventEmitter {
     this.express.use(parser.json());
   }
 
+  /**
+   * Configures service configuration with given options
+   * @private
+   * @param {object} opts - options object
+   */
   configure(opts) {
     Object.keys(opts).forEach((opt) => {
       this.config[opt] = opts[opt];
     });
   }
 
+  /**
+   * Initializes node rest client
+   * @private
+   */
   configureNodeRestClient() {
     const opts = {
       ca: this.config.ca
@@ -180,6 +241,13 @@ class Service extends EventEmitter {
     this.client = new rest.Client({ connection: opts });
   }
 
+  /**
+   * Stops service if it was runing.
+   * Starts authentication,
+   * socket listener creation and notification callback registration
+   * or notification polling processes
+   * @param {object} opts - options object
+   */
   start(opts) {
     return new Promise((fulfill, reject) => {
       const promises = [];
@@ -235,6 +303,11 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Stops authentication timer,
+   * shuts down socket listener and deletes notificatrion callback,
+   * stops polling notifications
+   */
   stop() {
     const promises = [];
 
@@ -255,6 +328,9 @@ class Service extends EventEmitter {
     return Promise.all(promises);
   }
 
+  /**
+   * Creates socket listener
+   */
   createServer() {
     return new Promise((fulfill, reject) => {
       this.express.put('/notification', (req, resp) => {
@@ -266,6 +342,9 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to authenticate user
+   */
   authenticate() {
     return new Promise((fulfill, reject) => {
       const data = {
@@ -286,6 +365,9 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to register notification callback
+   */
   registerNotificationCallback() {
     return new Promise((fulfill, reject) => {
       const data = {
@@ -306,6 +388,9 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to delete notification callback
+   */
   deleteNotificationCallback() {
     return new Promise((fulfill, reject) => {
       this.delete('/notification/callback').then((dataAndResponse) => {
@@ -319,6 +404,9 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to check whether or not notification callback is reigstered
+   */
   checkNotificationCallback() {
     return new Promise((fulfill, reject) => {
       this.get('/notification/callback').then((dataAndResponse) => {
@@ -333,6 +421,9 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to get notifications
+   */
   pullNotification() {
     return new Promise((fulfill, reject) => {
       this.get('/notification/pull').then((dataAndResponse) => {
@@ -343,6 +434,9 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to get all connected endpoints
+   */
   getDevices() {
     return new Promise((fulfill, reject) => {
       this.get('/endpoints').then((dataAndResponse) => {
@@ -357,6 +451,9 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Sends request to get REST servers version
+   */
   getVersion() {
     return new Promise((fulfill, reject) => {
       this.get('/version').then((dataAndResponse) => {
@@ -367,6 +464,9 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Adds TLV serializer to rest client
+   */
   addTlvSerializer() {
     this.client.serializers.add({
       name: 'buffer-serializer',
@@ -381,6 +481,10 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Performs GET requests with given path
+   * @param {string} path - request path
+   */
   get(path) {
     return new Promise((fulfill, reject) => {
       const url = this.config.host + path;
@@ -402,6 +506,12 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Performs PUT requests with given path, data and data type
+   * @param {string} path - request path
+   * @param argument - data which will be sent
+   * @param {string} type - data type
+   */
   put(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
       const url = this.config.host + path;
@@ -424,6 +534,10 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Performs GET requests with given path
+   * @param {string} path - request path
+   */
   delete(path) {
     return new Promise((fulfill, reject) => {
       const url = this.config.host + path;
@@ -444,6 +558,12 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Performs PUT requests with given path, data and data type
+   * @param {string} path - request path
+   * @param argument - data which will be sent
+   * @param type - data type
+   */
   post(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
       const url = this.config.host + path;
@@ -466,6 +586,12 @@ class Service extends EventEmitter {
     });
   }
 
+  /**
+   * Handles notification data and emits events
+   * @private
+   * @param {object} events - Notifications (registrations,
+   * reg-updates, de-registrations, async-responses)
+   */
   _processEvents(events) {
     for (let i = 0; i < events.registrations.length; i += 1) {
       const id = events.registrations[i].name;
