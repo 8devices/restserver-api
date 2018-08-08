@@ -6,6 +6,9 @@ const express = require('express');
 const parser = require('body-parser');
 const ip = require('ip');
 
+/**
+ * This class represents endpoints (devices)
+ */
 class Endpoint extends EventEmitter {
   /**
    * Constructor initiliazes given service object, endpoint's id
@@ -188,6 +191,9 @@ class Endpoint extends EventEmitter {
   }
 }
 
+/**
+ * This class represents REST API service
+ */
 class Service extends EventEmitter {
   /**
    * Initializes default configurations.
