@@ -7,7 +7,7 @@ const parser = require('body-parser');
 const ip = require('ip');
 
 /**
- * This class represents endpoint (device)
+ * This class represents endpoint (device).
  */
 class Endpoint extends EventEmitter {
   /**
@@ -199,7 +199,7 @@ class Endpoint extends EventEmitter {
 }
 
 /**
- * This class represents REST API service
+ * This class represents REST API service.
  */
 class Service extends EventEmitter {
   /**
@@ -492,6 +492,7 @@ class Service extends EventEmitter {
 
   /**
    * Adds TLV serializer to rest client.
+   * @private
    * @return {void}
    */
   addTlvSerializer() {
