@@ -84,6 +84,7 @@ class Endpoint extends EventEmitter {
    * @private
    * @param {string} id - endpoint id
    * @param {function} callback -   callback which will be called when async response is recieved
+   * @return {void}
    */
   addAsyncCallback(id, callback) {
     this.transactions[id] = callback;
@@ -235,6 +236,7 @@ class Service extends EventEmitter {
    * Configures service configuration with given options
    * @private
    * @param {object} opts - options object
+   * @return {void}
    */
   configure(opts) {
     Object.keys(opts).forEach((opt) => {
@@ -245,6 +247,7 @@ class Service extends EventEmitter {
   /**
    * Initializes node rest client
    * @private
+   * @return {void}
    */
   configureNodeRestClient() {
     const opts = {
@@ -259,7 +262,7 @@ class Service extends EventEmitter {
    * socket listener creation and notification callback registration
    * or notification polling processes
    * @param {object} opts - options object
-   * @returns {Promise}
+   * @returns {Promise} Empty promise
    */
   start(opts) {
     return new Promise((fulfill, reject) => {
@@ -344,7 +347,7 @@ class Service extends EventEmitter {
 
   /**
    * Creates socket listener
-   * @returns {Promise}
+   * @returns {Promise} Empty promise
    */
   createServer() {
     return new Promise((fulfill, reject) => {
@@ -383,7 +386,7 @@ class Service extends EventEmitter {
 
   /**
    * Sends request to register notification callback
-   * @returns {Promise}
+   * @returns {Promise} Empty promise
    */
   registerNotificationCallback() {
     return new Promise((fulfill, reject) => {
@@ -489,6 +492,7 @@ class Service extends EventEmitter {
 
   /**
    * Adds TLV serializer to rest client
+   * @return {void}
    */
   addTlvSerializer() {
     this.client.serializers.add({
@@ -533,7 +537,7 @@ class Service extends EventEmitter {
   /**
    * Performs PUT requests with given path, data and data type
    * @param {string} path - request path
-   * @param argument - data which will be sent
+   * @param {object} argument - data which will be sent
    * @param {string} type - data type
    * @returns {Promise} Promise with data and response object
    */
@@ -587,8 +591,8 @@ class Service extends EventEmitter {
   /**
    * Performs PUT requests with given path, data and data type
    * @param {string} path - request path
-   * @param argument - data which will be sent
-   * @param type - data type
+   * @param {object} argument - data which will be sent
+   * @param {string} type - data type
    * @returns {Promise} Promise with data and response object
    */
   post(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
@@ -618,6 +622,7 @@ class Service extends EventEmitter {
    * @private
    * @param {object} events - Notifications (registrations,
    * reg-updates, de-registrations, async-responses)
+   * @return {void}
    */
   _processEvents(events) {
     for (let i = 0; i < events.registrations.length; i += 1) {

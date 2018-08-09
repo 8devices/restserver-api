@@ -133,7 +133,7 @@ This class represents REST API service
     * [.pullNotification()](#Service+pullNotification) ⇒ <code>Promise</code>
     * [.getDevices()](#Service+getDevices) ⇒ <code>Promise</code>
     * [.getVersion()](#Service+getVersion) ⇒ <code>Promise</code>
-    * [.addTlvSerializer()](#Service+addTlvSerializer)
+    * [.addTlvSerializer()](#Service+addTlvSerializer) ⇒ <code>void</code>
     * [.get(path)](#Service+get) ⇒ <code>Promise</code>
     * [.put(path, argument, type)](#Service+put) ⇒ <code>Promise</code>
     * [.delete(path)](#Service+delete) ⇒ <code>Promise</code>
@@ -161,6 +161,7 @@ socket listener creation and notification callback registration
 or notification polling processes
 
 **Kind**: instance method of [<code>Service</code>](#Service)  
+**Returns**: <code>Promise</code> - Empty promise  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -181,6 +182,7 @@ stops polling notifications
 Creates socket listener
 
 **Kind**: instance method of [<code>Service</code>](#Service)  
+**Returns**: <code>Promise</code> - Empty promise  
 <a name="Service+authenticate"></a>
 
 ### service.authenticate() ⇒ <code>Promise</code>
@@ -194,6 +196,7 @@ Sends request to authenticate user
 Sends request to register notification callback
 
 **Kind**: instance method of [<code>Service</code>](#Service)  
+**Returns**: <code>Promise</code> - Empty promise  
 <a name="Service+deleteNotificationCallback"></a>
 
 ### service.deleteNotificationCallback() ⇒ <code>Promise</code>
@@ -232,7 +235,7 @@ Sends request to get REST servers version
 **Returns**: <code>Promise</code> - Promise with REST server's versiong  
 <a name="Service+addTlvSerializer"></a>
 
-### service.addTlvSerializer()
+### service.addTlvSerializer() ⇒ <code>void</code>
 Adds TLV serializer to rest client
 
 **Kind**: instance method of [<code>Service</code>](#Service)  
@@ -259,7 +262,7 @@ Performs PUT requests with given path, data and data type
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | path | <code>string</code> |  | request path |
-| argument |  |  | data which will be sent |
+| argument | <code>object</code> |  | data which will be sent |
 | type | <code>string</code> | <code>&quot;application/vnd.oma.lwm2m+tlv&quot;</code> | data type |
 
 <a name="Service+delete"></a>
@@ -285,8 +288,7 @@ Performs PUT requests with given path, data and data type
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | path | <code>string</code> |  | request path |
-| argument |  |  | data which will be sent |
-| type |  | <code>application/vnd.oma.lwm2m+tlv</code> | data type |
-
+| argument | <code>object</code> |  | data which will be sent |
+| type | <code>string</code> | <code>&quot;application/vnd.oma.lwm2m+tlv&quot;</code> | data type |
 
 
