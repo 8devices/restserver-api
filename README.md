@@ -5,14 +5,18 @@
 
 <dl>
 <dt><a href="#Endpoint">Endpoint</a></dt>
-<dd></dd>
+<dd><p>This class represents endpoint (device)</p>
+</dd>
 <dt><a href="#Service">Service</a></dt>
-<dd></dd>
+<dd><p>This class represents REST API service</p>
+</dd>
 </dl>
 
 <a name="Endpoint"></a>
 
 ## Endpoint
+This class represents endpoint (device)
+
 **Kind**: global class  
 
 * [Endpoint](#Endpoint)
@@ -107,6 +111,8 @@ Sends request to cancel subscriptions
 <a name="Service"></a>
 
 ## Service
+This class represents REST API service
+
 **Kind**: global class  
 
 * [Service](#Service)
@@ -263,5 +269,4 @@ Performs PUT requests with given path, data and data type
 | path | <code>string</code> |  | request path |
 | argument |  |  | data which will be sent |
 | type |  | <code>application/vnd.oma.lwm2m+tlv</code> | data type |
-
 
