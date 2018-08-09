@@ -7,7 +7,7 @@ const parser = require('body-parser');
 const ip = require('ip');
 
 /**
- * This class represents endpoints (devices)
+ * This class represents endpoint (device)
  */
 class Endpoint extends EventEmitter {
   /**
@@ -62,6 +62,7 @@ class Endpoint extends EventEmitter {
 
   /**
    * Sends request to get all endpoint's objects
+   * @returns {Promise} Promise object with endpoint's objects
    */
   getObjects() {
     return new Promise((fulfill, reject) => {
@@ -92,6 +93,7 @@ class Endpoint extends EventEmitter {
    * Sends request to read endpoint's resource data
    * @param {string} path - resource path
    * @param {function} callback - callback which will be called when async response is recieved
+   * @returns {Promise} Promise object with async response id
    */
   read(path, callback) {
     return new Promise((fulfill, reject) => {
@@ -114,6 +116,7 @@ class Endpoint extends EventEmitter {
    * @param {string} path - resource path
    * @param {function} callback - callback which will be called when async response is recieved
    * @param {buffer} tlvBuffer - data in TLV format
+   * @returns {Promise} Promise object with async response id
    */
   write(path, callback, tlvBuffer) {
     return new Promise((fulfill, reject) => {
@@ -135,6 +138,7 @@ class Endpoint extends EventEmitter {
    * Sends request to execute endpoint's resource
    * @param {string} path - resource path
    * @param {function} callback - callback which will be called when async response is recieved
+   * @returns {Promise} Promise object with async response id
    */
   execute(path, callback) {
     return new Promise((fulfill, reject) => {
@@ -156,6 +160,7 @@ class Endpoint extends EventEmitter {
    * Sends request to subscribe to resource
    * @param {string} path - resource path
    * @param {function} callback - callback which will be called when async response is recieved
+   * @returns {Promise} Promise object with async response id
    */
   observe(path, callback) {
     return new Promise((fulfill, reject) => {
@@ -176,6 +181,7 @@ class Endpoint extends EventEmitter {
   /**
    * Sends request to cancel subscriptions
    * @param {string} path - resource path
+   * @returns {Promise} Promise object with HTTP status code
    */
   cancelObserve(path) {
     return new Promise((fulfill, reject) => {
@@ -253,6 +259,7 @@ class Service extends EventEmitter {
    * socket listener creation and notification callback registration
    * or notification polling processes
    * @param {object} opts - options object
+   * @returns {Promise}
    */
   start(opts) {
     return new Promise((fulfill, reject) => {
@@ -313,6 +320,7 @@ class Service extends EventEmitter {
    * Stops authentication timer,
    * shuts down socket listener and deletes notificatrion callback,
    * stops polling notifications
+   * @returns {Promise} Promise array
    */
   stop() {
     const promises = [];
@@ -336,6 +344,7 @@ class Service extends EventEmitter {
 
   /**
    * Creates socket listener
+   * @returns {Promise}
    */
   createServer() {
     return new Promise((fulfill, reject) => {
@@ -350,6 +359,7 @@ class Service extends EventEmitter {
 
   /**
    * Sends request to authenticate user
+   * @returns {Promise} Promise with authentication data (token and after what time it expires)
    */
   authenticate() {
     return new Promise((fulfill, reject) => {
@@ -373,6 +383,7 @@ class Service extends EventEmitter {
 
   /**
    * Sends request to register notification callback
+   * @returns {Promise}
    */
   registerNotificationCallback() {
     return new Promise((fulfill, reject) => {
@@ -396,6 +407,7 @@ class Service extends EventEmitter {
 
   /**
    * Sends request to delete notification callback
+   * @returns {Promise} Promise object with HTTP status code
    */
   deleteNotificationCallback() {
     return new Promise((fulfill, reject) => {
@@ -412,6 +424,7 @@ class Service extends EventEmitter {
 
   /**
    * Sends request to check whether or not notification callback is reigstered
+   * @returns {Promise} Promise with notification callback data
    */
   checkNotificationCallback() {
     return new Promise((fulfill, reject) => {
@@ -429,6 +442,8 @@ class Service extends EventEmitter {
 
   /**
    * Sends request to get notifications
+   * @returns {Promise} Promise with notification data (registrations,
+   * deregistrations, updates, async responses)
    */
   pullNotification() {
     return new Promise((fulfill, reject) => {
@@ -442,6 +457,7 @@ class Service extends EventEmitter {
 
   /**
    * Sends request to get all connected endpoints
+   * @returns {Promise} Promise with endpoints
    */
   getDevices() {
     return new Promise((fulfill, reject) => {
@@ -459,6 +475,7 @@ class Service extends EventEmitter {
 
   /**
    * Sends request to get REST servers version
+   * @returns {Promise} Promise with REST server's versiong
    */
   getVersion() {
     return new Promise((fulfill, reject) => {
@@ -490,6 +507,7 @@ class Service extends EventEmitter {
   /**
    * Performs GET requests with given path
    * @param {string} path - request path
+   * @returns {Promise} Promise with data and response object
    */
   get(path) {
     return new Promise((fulfill, reject) => {
@@ -517,6 +535,7 @@ class Service extends EventEmitter {
    * @param {string} path - request path
    * @param argument - data which will be sent
    * @param {string} type - data type
+   * @returns {Promise} Promise with data and response object
    */
   put(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
@@ -543,6 +562,7 @@ class Service extends EventEmitter {
   /**
    * Performs GET requests with given path
    * @param {string} path - request path
+   * @returns {Promise} Promise with data and response object
    */
   delete(path) {
     return new Promise((fulfill, reject) => {
@@ -569,6 +589,7 @@ class Service extends EventEmitter {
    * @param {string} path - request path
    * @param argument - data which will be sent
    * @param type - data type
+   * @returns {Promise} Promise with data and response object
    */
   post(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
