@@ -16,8 +16,8 @@ class Endpoint extends EventEmitter {
    * registers, updates, deregisters, sends data), handles "async
    * responses" and emits "register", "update", "deregister" events.
    * @constructor
-   * @param {object} service - service object
-   * @param {string} id - endpoint id
+   * @param {object} service - Service object
+   * @param {string} id - Endpoint id
    */
   constructor(service, id) {
     super();
@@ -82,8 +82,8 @@ class Endpoint extends EventEmitter {
    * Adds a callback to transactions list.
    * Key value is endpoint's id.
    * @private
-   * @param {string} id - endpoint id
-   * @param {function} callback -   callback which will be called when async response is received
+   * @param {string} id - Endpoint id
+   * @param {function} callback - Callback which will be called when async response is received
    * @return {void}
    */
   addAsyncCallback(id, callback) {
@@ -92,9 +92,9 @@ class Endpoint extends EventEmitter {
 
   /**
    * Sends request to read endpoint's resource data.
-   * @param {string} path - resource path
-   * @param {function} callback - callback which will be called when async response is received
-   * @returns {Promise} Promise object with async response id
+   * @param {string} path - Resource path
+   * @param {function} callback - Callback which will be called when async response is received
+   * @returns {Promise} Promise with async response id
    */
   read(path, callback) {
     return new Promise((fulfill, reject) => {
@@ -114,10 +114,10 @@ class Endpoint extends EventEmitter {
 
   /**
    * Sends request to write a value into endpoint's resource.
-   * @param {string} path - resource path
-   * @param {function} callback - callback which will be called when async response is received
-   * @param {buffer} tlvBuffer - data in TLV format
-   * @returns {Promise} Promise object with async response id
+   * @param {string} path - Resource path
+   * @param {function} callback - Callback which will be called when async response is received
+   * @param {buffer} tlvBuffer - Data in TLV format
+   * @returns {Promise} Promise with async response id
    */
   write(path, callback, tlvBuffer) {
     return new Promise((fulfill, reject) => {
@@ -137,9 +137,9 @@ class Endpoint extends EventEmitter {
 
   /**
    * Sends request to execute endpoint's resource.
-   * @param {string} path - resource path
-   * @param {function} callback - callback which will be called when async response is received
-   * @returns {Promise} Promise object with async response id
+   * @param {string} path - Resource path
+   * @param {function} callback - Callback which will be called when async response is received
+   * @returns {Promise} Promise with async response id
    */
   execute(path, callback) {
     return new Promise((fulfill, reject) => {
@@ -159,9 +159,9 @@ class Endpoint extends EventEmitter {
 
   /**
    * Sends request to subscribe to resource.
-   * @param {string} path - resource path
-   * @param {function} callback - callback which will be called when async response is received
-   * @returns {Promise} Promise object with async response id
+   * @param {string} path - Resource path
+   * @param {function} callback - Callback which will be called when async response is received
+   * @returns {Promise} Promise with async response id
    */
   observe(path, callback) {
     return new Promise((fulfill, reject) => {
@@ -181,8 +181,8 @@ class Endpoint extends EventEmitter {
 
   /**
    * Sends request to cancel subscriptions.
-   * @param {string} path - resource path
-   * @returns {Promise} Promise object with HTTP status code
+   * @param {string} path - Resource path
+   * @returns {Promise} Promise with HTTP status code
    */
   cancelObserve(path) {
     return new Promise((fulfill, reject) => {
@@ -200,15 +200,30 @@ class Endpoint extends EventEmitter {
 
 /**
  * This class represents REST API service.
+   * @example
+   * const opts = config = {
+   *   // REST server's address
+   *   host: 'http://localhost:8888',
+   *   // CA certificate
+   *   ca: '',
+   *   // authentication (true or false)
+   *   authentication: false,
+   *   username: '',
+   *   password: '',
+   *   // notification polling (true or false)
+   *   polling: false,
+   *   // Time between each poll in miliseconds
+   *   interval: 1234,
+   *   // port for socket listener (not relevant if polling is disabled)
+   *   port: 5728,
+   * };
+   * new Service(opts);
  */
 class Service extends EventEmitter {
   /**
-   * Initializes default configurations.
-   * opts - options object which stores host, ca (CA certificate),
-   * authentication (true/ false), username, password, polling (true/false),
-   * port (for socket listener).
+   * Initializes default configurations. Reconfigures with given options.
    * @constructor
-   * @param {object} opts - options object
+   * @param {object} opts - Options object
    */
   constructor(opts) {
     super();
@@ -235,7 +250,7 @@ class Service extends EventEmitter {
   /**
    * Configures service configuration with given options.
    * @private
-   * @param {object} opts - options object
+   * @param {object} opts - Options object
    * @return {void}
    */
   configure(opts) {
@@ -257,12 +272,29 @@ class Service extends EventEmitter {
   }
 
   /**
-   * Stops service if it was runing.
-   * Starts authentication,
+   * (Re)starts authentication,
    * socket listener creation and notification callback registration
    * or notification polling processes.
-   * @param {object} opts - options object
-   * @returns {Promise} Empty promise
+   * @example
+   * const opts = config = {
+   *   // REST server's address
+   *   host: 'http://localhost:8888',
+   *   // CA certificate
+   *   ca: '',
+   *   // authentication (true or false)
+   *   authentication: false,
+   *   username: '',
+   *   password: '',
+   *   // notification polling (true or false)
+   *   polling: false,
+   *   // Time between each poll in miliseconds
+   *   interval: 1234,
+   *   // port for socket listener (not relevant if polling is disabled)
+   *   port: 5728,
+   * };
+   * service.start(opts);
+   * @param {object} opts - Options object (optional)
+   * @returns {Promise} Promise which fulfills when service is started
    */
   start(opts) {
     return new Promise((fulfill, reject) => {
@@ -320,10 +352,11 @@ class Service extends EventEmitter {
   }
 
   /**
-   * Stops authentication timer,
-   * shuts down socket listener and deletes notificatrion callback,
-   * stops polling notifications.
-   * @returns {Promise} Promise array
+   * Stops receiving and processing events
+   * Stops this service and all it's subservices
+   * that were started in start().
+   * Cleans up resources
+   * @returns {Promise} Promise which fulfills when service is stopped
    */
   stop() {
     const promises = [];
@@ -347,7 +380,8 @@ class Service extends EventEmitter {
 
   /**
    * Creates socket listener.
-   * @returns {Promise} Empty promise
+   * @private
+   * @returns {Promise} Promise which fulfills when socket listener is created
    */
   createServer() {
     return new Promise((fulfill, reject) => {
@@ -386,7 +420,7 @@ class Service extends EventEmitter {
 
   /**
    * Sends request to register notification callback.
-   * @returns {Promise} Empty promise
+   * @returns {Promise} Promise which fulfills when notification callback is registered
    */
   registerNotificationCallback() {
     return new Promise((fulfill, reject) => {
@@ -410,7 +444,7 @@ class Service extends EventEmitter {
 
   /**
    * Sends request to delete notification callback.
-   * @returns {Promise} Promise object with HTTP status code
+   * @returns {Promise} Promise with HTTP status code
    */
   deleteNotificationCallback() {
     return new Promise((fulfill, reject) => {
@@ -426,7 +460,7 @@ class Service extends EventEmitter {
   }
 
   /**
-   * Sends request to check whether or not notification callback is reigstered.
+   * Sends request to check whether or not notification callback is registered.
    * @returns {Promise} Promise with notification callback data
    */
   checkNotificationCallback() {
@@ -444,7 +478,7 @@ class Service extends EventEmitter {
   }
 
   /**
-   * Sends request to get notifications.
+   * Sends request to get pending/queued notifications.
    * @returns {Promise} Promise with notification data (registrations,
    * deregistrations, updates, async responses)
    */
@@ -459,7 +493,7 @@ class Service extends EventEmitter {
   }
 
   /**
-   * Sends request to get all connected endpoints.
+   * Sends request to get all registered endpoints.
    * @returns {Promise} Promise with endpoints
    */
   getDevices() {
@@ -477,8 +511,8 @@ class Service extends EventEmitter {
   }
 
   /**
-   * Sends request to get REST servers version.
-   * @returns {Promise} Promise with REST server's versiong
+   * Sends request to get REST server version.
+   * @returns {Promise} Promise with REST server's version
    */
   getVersion() {
     return new Promise((fulfill, reject) => {
@@ -511,7 +545,7 @@ class Service extends EventEmitter {
 
   /**
    * Performs GET requests with given path.
-   * @param {string} path - request path
+   * @param {string} path - Request path
    * @returns {Promise} Promise with data and response object
    */
   get(path) {
@@ -537,9 +571,9 @@ class Service extends EventEmitter {
 
   /**
    * Performs PUT requests with given path, data and data type.
-   * @param {string} path - request path
-   * @param {object} argument - data which will be sent
-   * @param {string} type - data type
+   * @param {string} path - Request path
+   * @param {object} argument - Data which will be sent (optional)
+   * @param {string} type - Data type (optional)
    * @returns {Promise} Promise with data and response object
    */
   put(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
@@ -565,8 +599,8 @@ class Service extends EventEmitter {
   }
 
   /**
-   * Performs GET requests with given path.
-   * @param {string} path - request path
+   * Performs DELETE requests with given path.
+   * @param {string} path - Request path
    * @returns {Promise} Promise with data and response object
    */
   delete(path) {
@@ -590,10 +624,10 @@ class Service extends EventEmitter {
   }
 
   /**
-   * Performs PUT requests with given path, data and data type.
-   * @param {string} path - request path
-   * @param {object} argument - data which will be sent
-   * @param {string} type - data type
+   * Performs POST requests with given path, data and data type.
+   * @param {string} path - Request path
+   * @param {object} argument - Data which will be sent (optional)
+   * @param {string} type - Data type (optional)
    * @returns {Promise} Promise with data and response object
    */
   post(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
