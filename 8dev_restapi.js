@@ -83,7 +83,7 @@ class Endpoint extends EventEmitter {
    * Key value is endpoint's id
    * @private
    * @param {string} id - endpoint id
-   * @param {function} callback -   callback which will be called when async response is recieved
+   * @param {function} callback -   callback which will be called when async response is received
    * @return {void}
    */
   addAsyncCallback(id, callback) {
@@ -93,7 +93,7 @@ class Endpoint extends EventEmitter {
   /**
    * Sends request to read endpoint's resource data
    * @param {string} path - resource path
-   * @param {function} callback - callback which will be called when async response is recieved
+   * @param {function} callback - callback which will be called when async response is received
    * @returns {Promise} Promise object with async response id
    */
   read(path, callback) {
@@ -115,7 +115,7 @@ class Endpoint extends EventEmitter {
   /**
    * Sends request to write a value into endpoint's resource
    * @param {string} path - resource path
-   * @param {function} callback - callback which will be called when async response is recieved
+   * @param {function} callback - callback which will be called when async response is received
    * @param {buffer} tlvBuffer - data in TLV format
    * @returns {Promise} Promise object with async response id
    */
@@ -138,7 +138,7 @@ class Endpoint extends EventEmitter {
   /**
    * Sends request to execute endpoint's resource
    * @param {string} path - resource path
-   * @param {function} callback - callback which will be called when async response is recieved
+   * @param {function} callback - callback which will be called when async response is received
    * @returns {Promise} Promise object with async response id
    */
   execute(path, callback) {
@@ -160,7 +160,7 @@ class Endpoint extends EventEmitter {
   /**
    * Sends request to subscribe to resource
    * @param {string} path - resource path
-   * @param {function} callback - callback which will be called when async response is recieved
+   * @param {function} callback - callback which will be called when async response is received
    * @returns {Promise} Promise object with async response id
    */
   observe(path, callback) {
