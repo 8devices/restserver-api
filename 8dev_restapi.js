@@ -201,7 +201,7 @@ class Endpoint extends EventEmitter {
 /**
  * This class represents REST API service.
    * @example
-   * const opts = config = {
+   * const opts = {
    *   // REST server's address
    *   host: 'http://localhost:8888',
    *   // CA certificate
@@ -276,7 +276,7 @@ class Service extends EventEmitter {
    * socket listener creation and notification callback registration
    * or notification polling processes.
    * @example
-   * const opts = config = {
+   * const opts = {
    *   // REST server's address
    *   host: 'http://localhost:8888',
    *   // CA certificate

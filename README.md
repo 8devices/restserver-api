@@ -149,7 +149,7 @@ Initializes default configurations. Reconfigures with given options.
 
 **Example**  
 ```js
-const opts = config = {
+const opts = {
   // REST server's address
   host: 'http://localhost:8888',
   // CA certificate
@@ -183,7 +183,7 @@ or notification polling processes.
 
 **Example**  
 ```js
-const opts = config = {
+const opts = {
   // REST server's address
   host: 'http://localhost:8888',
   // CA certificate
