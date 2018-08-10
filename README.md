@@ -49,6 +49,14 @@ Sends request to get all endpoint's objects.
 
 **Kind**: instance method of [<code>Endpoint</code>](#Endpoint)  
 **Returns**: <code>Promise</code> - Promise object with endpoint's objects  
+**Example**  
+```js
+endpoint.getObjects().then((resp) => {
+  // resp = [ { uri: '/1/0' }, { uri: '/2/0' }, ... ]
+}).catch((err) => {
+  // err - exception message object or status code
+});
+```
 <a name="Endpoint+read"></a>
 
 ### endpoint.read(path, callback) ⇒ <code>Promise</code>

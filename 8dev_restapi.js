@@ -63,6 +63,12 @@ class Endpoint extends EventEmitter {
   /**
    * Sends request to get all endpoint's objects.
    * @returns {Promise} Promise object with endpoint's objects
+   * @example
+   * endpoint.getObjects().then((resp) => {
+   *   // resp = [ { uri: '/1/0' }, { uri: '/2/0' }, ... ]
+   * }).catch((err) => {
+   *   // err - exception message object or status code
+   * });
    */
   getObjects() {
     return new Promise((fulfill, reject) => {
