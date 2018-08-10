@@ -98,9 +98,9 @@ Sends request to write a value into endpoint's resource.
 **Example**  
 ```js
 endpoint.write(path, (status) => {
- // status = 202
+  // status = 202
 }, tlvBuffer).then((asyncResponseId) => {
- // asyncResponseId = 1533889926#870a3f17-3e21-b6ad-f63d-5cfe
+  // asyncResponseId = 1533889926#870a3f17-3e21-b6ad-f63d-5cfe
 }).catch((err) => {
   // err - exception object or status code
 });
@@ -121,9 +121,9 @@ Sends request to execute endpoint's resource.
 **Example**  
 ```js
 endpoint.execute(path, (status) => {
- // status = 202
+  // status = 202
 }).then((asyncResponseId) => {
- // asyncResponseId = 1533889926#870a3f17-3e21-b6ad-f63d-5cfe
+  // asyncResponseId = 1533889926#870a3f17-3e21-b6ad-f63d-5cfe
 }).catch((err) => {
   // err - exception object or status code
 });
@@ -167,7 +167,7 @@ Sends request to cancel subscriptions.
 **Example**  
 ```js
 endpoint.cancelObserve(path).then((status) => {
- // status - status code
+  // status - status code
 }).catch((err) => {
   // err - exception object
 });

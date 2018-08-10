@@ -135,9 +135,9 @@ class Endpoint extends EventEmitter {
    * @returns {Promise} Promise with async response id
    * @example
    * endpoint.write(path, (status) => {
-   *  // status = 202
+   *   // status = 202
    * }, tlvBuffer).then((asyncResponseId) => {
-   *  // asyncResponseId = 1533889926#870a3f17-3e21-b6ad-f63d-5cfe
+   *   // asyncResponseId = 1533889926#870a3f17-3e21-b6ad-f63d-5cfe
    * }).catch((err) => {
    *   // err - exception object or status code
    * });
@@ -165,9 +165,9 @@ class Endpoint extends EventEmitter {
    * @returns {Promise} Promise with async response id
    * @example
    * endpoint.execute(path, (status) => {
-   *  // status = 202
+   *   // status = 202
    * }).then((asyncResponseId) => {
-   *  // asyncResponseId = 1533889926#870a3f17-3e21-b6ad-f63d-5cfe
+   *   // asyncResponseId = 1533889926#870a3f17-3e21-b6ad-f63d-5cfe
    * }).catch((err) => {
    *   // err - exception object or status code
    * });
@@ -225,7 +225,7 @@ class Endpoint extends EventEmitter {
    * @returns {Promise} Promise with HTTP status code
    * @example
    * endpoint.cancelObserve(path).then((status) => {
-   *  // status - status code
+   *   // status - status code
    * }).catch((err) => {
    *   // err - exception object
    * });
