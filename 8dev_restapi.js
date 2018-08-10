@@ -214,7 +214,7 @@ class Endpoint extends EventEmitter {
    *   polling: false,
    *   // Time between each poll in miliseconds
    *   interval: 1234,
-   *   // port for socket listener (not relevant if polling is disabled)
+   *   // port for socket listener (not relevant if polling is enabled)
    *   port: 5728,
    * };
    * new Service(opts);
@@ -223,7 +223,7 @@ class Service extends EventEmitter {
   /**
    * Initializes default configurations. Reconfigures with given options.
    * @constructor
-   * @param {object} opts - Options object
+   * @param {object} opts - Options object (optional)
    */
   constructor(opts) {
     super();
@@ -289,7 +289,7 @@ class Service extends EventEmitter {
    *   polling: false,
    *   // Time between each poll in miliseconds
    *   interval: 1234,
-   *   // port for socket listener (not relevant if polling is disabled)
+   *   // port for socket listener (not relevant if polling is enabled)
    *   port: 5728,
    * };
    * service.start(opts);

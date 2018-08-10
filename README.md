@@ -145,7 +145,7 @@ Initializes default configurations. Reconfigures with given options.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| opts | <code>object</code> | Options object |
+| opts | <code>object</code> | Options object (optional) |
 
 **Example**  
 ```js
@@ -162,7 +162,7 @@ const opts = {
   polling: false,
   // Time between each poll in miliseconds
   interval: 1234,
-  // port for socket listener (not relevant if polling is disabled)
+  // port for socket listener (not relevant if polling is enabled)
   port: 5728,
 };
 new Service(opts);
@@ -196,7 +196,7 @@ const opts = {
   polling: false,
   // Time between each poll in miliseconds
   interval: 1234,
-  // port for socket listener (not relevant if polling is disabled)
+  // port for socket listener (not relevant if polling is enabled)
   port: 5728,
 };
 service.start(opts);
