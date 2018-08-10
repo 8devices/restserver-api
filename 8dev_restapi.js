@@ -95,6 +95,15 @@ class Endpoint extends EventEmitter {
    * @param {string} path - Resource path
    * @param {function} callback - Callback which will be called when async response is received
    * @returns {Promise} Promise with async response id
+   * @example
+   * endpoint.read(path, (status, payload) => {
+   *   // status = 200
+   *   // payload = 4RbaAA==
+   * }).then((asyncResponseId) => {
+   *   // asyncResponseId = 1533889157#42f26784-1a8d-4861-36aa-d88f
+   * }).catch((err) => {
+   *   // err - exception object or status code
+   * });
    */
   read(path, callback) {
     return new Promise((fulfill, reject) => {
@@ -118,6 +127,14 @@ class Endpoint extends EventEmitter {
    * @param {function} callback - Callback which will be called when async response is received
    * @param {buffer} tlvBuffer - Data in TLV format
    * @returns {Promise} Promise with async response id
+   * @example
+   * endpoint.write(path, (status) => {
+   *  // status = 202
+   * }, tlvBuffer).then((asyncResponseId) => {
+   *  // asyncResponseId = 1533889926#870a3f17-3e21-b6ad-f63d-5cfe
+   * }).catch((err) => {
+   *   // err - exception object or status code
+   * });
    */
   write(path, callback, tlvBuffer) {
     return new Promise((fulfill, reject) => {
@@ -140,6 +157,14 @@ class Endpoint extends EventEmitter {
    * @param {string} path - Resource path
    * @param {function} callback - Callback which will be called when async response is received
    * @returns {Promise} Promise with async response id
+   * @example
+   * endpoint.execute(path, (status) => {
+   *  // status = 202
+   * }).then((asyncResponseId) => {
+   *  // asyncResponseId = 1533889926#870a3f17-3e21-b6ad-f63d-5cfe
+   * }).catch((err) => {
+   *   // err - exception object or status code
+   * });
    */
   execute(path, callback) {
     return new Promise((fulfill, reject) => {
@@ -162,6 +187,15 @@ class Endpoint extends EventEmitter {
    * @param {string} path - Resource path
    * @param {function} callback - Callback which will be called when async response is received
    * @returns {Promise} Promise with async response id
+   * @example
+   * endpoint.observe(path, (status, payload) => {
+   *   // status = 200
+   *   // payload = 4RbaAA==
+   * }).then((asyncResponseId) => {
+   *   // asyncResponseId = 1533889157#42f26784-1a8d-4861-36aa-d88f
+   * }).catch((err) => {
+   *   // err - exception object or status code
+   * });
    */
   observe(path, callback) {
     return new Promise((fulfill, reject) => {
@@ -183,6 +217,12 @@ class Endpoint extends EventEmitter {
    * Sends request to cancel subscriptions.
    * @param {string} path - Resource path
    * @returns {Promise} Promise with HTTP status code
+   * @example
+   * endpoint.cancelObserve(path).then((status) => {
+   *  // status - status code
+   * }).catch((err) => {
+   *   // err - exception object
+   * });
    */
   cancelObserve(path) {
     return new Promise((fulfill, reject) => {
@@ -201,7 +241,7 @@ class Endpoint extends EventEmitter {
 /**
  * This class represents REST API service.
    * @example
-   * const opts = {
+   * const options = {
    *   // REST server's address
    *   host: 'http://localhost:8888',
    *   // CA certificate
@@ -217,7 +257,7 @@ class Endpoint extends EventEmitter {
    *   // port for socket listener (not relevant if polling is enabled)
    *   port: 5728,
    * };
-   * new Service(opts);
+   * new Service(options);
  */
 class Service extends EventEmitter {
   /**
@@ -276,7 +316,13 @@ class Service extends EventEmitter {
    * socket listener creation and notification callback registration
    * or notification polling processes.
    * @example
-   * const opts = {
+   * service.start().then(() => {
+   *   // started service
+   * }).catch((err) => {
+   *   // err - exception object
+   * });
+   * @example <caption>Passing options object</caption>
+   * const options = {
    *   // REST server's address
    *   host: 'http://localhost:8888',
    *   // CA certificate
@@ -292,7 +338,7 @@ class Service extends EventEmitter {
    *   // port for socket listener (not relevant if polling is enabled)
    *   port: 5728,
    * };
-   * service.start(opts);
+   * service.start(options);
    * @param {object} opts - Options object (optional)
    * @returns {Promise} Promise which fulfills when service is started
    */
@@ -357,6 +403,10 @@ class Service extends EventEmitter {
    * that were started in start().
    * Cleans up resources
    * @returns {Promise} Promise which fulfills when service is stopped
+   * @example
+   * service.stop().then(() => {
+   *   // stopped service
+   * });
    */
   stop() {
     const promises = [];
@@ -397,6 +447,12 @@ class Service extends EventEmitter {
   /**
    * Sends request to authenticate user.
    * @returns {Promise} Promise with authentication data (token and after what time it expires)
+   * @example
+   * service.authenticate().then((resp) => {
+   *   // resp = { access_token: 'token-value', expires_in: 3600 }
+   * }).catch((err) => {
+   *   // err - exception message object or status code
+   * });
    */
   authenticate() {
     return new Promise((fulfill, reject) => {
@@ -421,6 +477,12 @@ class Service extends EventEmitter {
   /**
    * Sends request to register notification callback.
    * @returns {Promise} Promise which fulfills when notification callback is registered
+   * @example
+   * service.registerNotificationCallback().then(() => {
+   *   // notification callback has been registered
+   * }).catch((err) => {
+   *   // err - exception object or status code
+   * });
    */
   registerNotificationCallback() {
     return new Promise((fulfill, reject) => {
@@ -445,6 +507,12 @@ class Service extends EventEmitter {
   /**
    * Sends request to delete notification callback.
    * @returns {Promise} Promise with HTTP status code
+   * @example
+   * service.deleteNotificationCallback().then((status) => {
+   *   // status - status code
+   * }).catch((err) => {
+   *   // err - exception object
+   * });
    */
   deleteNotificationCallback() {
     return new Promise((fulfill, reject) => {
@@ -462,6 +530,12 @@ class Service extends EventEmitter {
   /**
    * Sends request to check whether or not notification callback is registered.
    * @returns {Promise} Promise with notification callback data
+   * @example
+   * service.checkNotificationCallback().then((resp) => {
+   *   // resp = { url: 'http://localhost:5728/notification', headers: {} }
+   * }).catch((err) => {
+   *   // err - exception message object or status code
+   * });
    */
   checkNotificationCallback() {
     return new Promise((fulfill, reject) => {
@@ -481,6 +555,12 @@ class Service extends EventEmitter {
    * Sends request to get pending/queued notifications.
    * @returns {Promise} Promise with notification data (registrations,
    * deregistrations, updates, async responses)
+   * @example
+   * service.pullNotification().then((resp) => {
+   *   // resp = { registrations: [...], 'reg-updates': [...], ... }
+   * }).catch((err) => {
+   *   // err - exception object
+   * });
    */
   pullNotification() {
     return new Promise((fulfill, reject) => {
@@ -494,7 +574,13 @@ class Service extends EventEmitter {
 
   /**
    * Sends request to get all registered endpoints.
-   * @returns {Promise} Promise with endpoints
+   * @returns {Promise} Promise with a list of endpoints
+   * @example
+   * service.getDevices().then((resp) => {
+   *   // resp = [ { name: 'uuid-4567', type: '8dev_3700', ... }, ... ]
+   * }).catch((err) => {
+   *   // err - exception message object or status code
+   * });
    */
   getDevices() {
     return new Promise((fulfill, reject) => {
@@ -513,6 +599,12 @@ class Service extends EventEmitter {
   /**
    * Sends request to get REST server version.
    * @returns {Promise} Promise with REST server's version
+   * @example
+   * service.getVersion().then((resp) => {
+   *   // resp = '1.0.0'
+   * }).catch((err) => {
+   *   // err - exception object
+   * });
    */
   getVersion() {
     return new Promise((fulfill, reject) => {
@@ -547,6 +639,13 @@ class Service extends EventEmitter {
    * Performs GET requests with given path.
    * @param {string} path - Request path
    * @returns {Promise} Promise with data and response object
+   * @example
+   * service.get(path).then((dataAndResponse) => {
+   *   // dataAndResponse.data - data object
+   *   // dataAndResponse.resp - response object
+   * }).catch((err) => {
+   *   // err - exception object
+   * });
    */
   get(path) {
     return new Promise((fulfill, reject) => {
