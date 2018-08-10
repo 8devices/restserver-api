@@ -258,7 +258,7 @@ class Endpoint extends EventEmitter {
    *   password: '',
    *   // notification polling (true or false)
    *   polling: false,
-   *   // Time between each poll in miliseconds
+   *   // time between each poll in miliseconds
    *   interval: 1234,
    *   // port for socket listener (not relevant if polling is enabled)
    *   port: 5728,
@@ -339,7 +339,7 @@ class Service extends EventEmitter {
    *   password: '',
    *   // notification polling (true or false)
    *   polling: false,
-   *   // Time between each poll in miliseconds
+   *   // time between each poll in miliseconds
    *   interval: 1234,
    *   // port for socket listener (not relevant if polling is enabled)
    *   port: 5728,
