@@ -1,7 +1,8 @@
 const chai = require('chai');
+
 const { expect } = chai;
 
-const TLV = require('../lwm2m').TLV;
+const { TLV } = require('../lwm2m');
 
 describe('LwM2M TLV', () => {
   describe('encodeResourceValue', () => {
@@ -105,6 +106,5 @@ describe('LwM2M TLV', () => {
 
       expect(encode(res)).to.be.eql(Buffer.from([0x80, 0x00, 0x00, 0x00]));
     });
-
   });
 });
