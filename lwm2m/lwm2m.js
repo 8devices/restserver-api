@@ -55,6 +55,15 @@ function getDictionaryByValue(dictionaryList, keyName, value) {
 }
 
 function encodeResourceValue(resource) {
+  const MIN_INT8 = -0x80;
+  const MAX_INT8 = 0x7f;
+  const MIN_INT16 = -0x8000;
+  const MAX_INT16 = 0x7fff;
+  const MIN_INT32 = -0x80000000;
+  const MAX_INT32 = 0x7fffffff;
+
+  let buffer;
+
   if (typeof (resource.type) !== 'number') {
     throw Error(`Unrecognised resource type type (${typeof (resource.type)})`);
   }
@@ -72,15 +81,14 @@ function encodeResourceValue(resource) {
         throw Error(`Cannot encode ${typeof (resource.value)} as integer`);
       }
 
-      let buffer;
 
-      if (-(2**7) <= resource.value && resource.value < 2**7) {
+      if (resource.value >= MIN_INT8 && resource.value <= MAX_INT8) {
         buffer = Buffer.alloc(1);
         buffer.writeInt8(resource.value);
-      } else if (resource.value >= -(2**15) && resource.value < 2**15) {
+      } else if (resource.value >= MIN_INT16 && resource.value <= MAX_INT16) {
         buffer = Buffer.alloc(2);
         buffer.writeInt16BE(resource.value);
-      } else if (resource.value >= -(2**31) && resource.value < 2**31) {
+      } else if (resource.value >= MIN_INT32 && resource.value <= MAX_INT32) {
         buffer = Buffer.alloc(4);
         buffer.writeInt32BE(resource.value);
       } else {
@@ -96,7 +104,7 @@ function encodeResourceValue(resource) {
         throw Error(`Cannot encode ${typeof (resource.value)} as float`);
       }
 
-      let buffer = Buffer.alloc(4);
+      buffer = Buffer.alloc(4);
       buffer.writeFloatBE(resource.value);
       return buffer;
     }
