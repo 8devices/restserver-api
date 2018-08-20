@@ -106,6 +106,7 @@ function encodeResourceValue(resource) {
 
       buffer = Buffer.alloc(4);
       buffer.writeFloatBE(resource.value);
+
       return buffer;
     }
 
@@ -488,6 +489,9 @@ function decodeObjectTLV(buffer, object) {
 module.exports = {
   TYPE,
   RESOURCE_TYPE,
+  binaryToInteger,
+  binaryToBitString,
+  changeBufferSize,
   getDictionaryByValue,
   encodeTLV,
   decodeTLV,
