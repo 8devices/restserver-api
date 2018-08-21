@@ -106,7 +106,6 @@ function encodeResourceValue(resource) {
 
       buffer = Buffer.alloc(4);
       buffer.writeFloatBE(resource.value);
-
       return buffer;
     }
 
@@ -250,7 +249,6 @@ function encodeResourceInstanceTLV(resourceInstance) {
 
 function encodeMultipleResourcesTLV(resources) {
   const resourceInstancesBuffers = [];
-
   for (let index = 0; index < resources.value.length; index += 1) {
     resourceInstancesBuffers.push(encodeResourceInstanceTLV({
       type: resources.type,
@@ -405,7 +403,6 @@ function decodeMultipleResourceInstancesTLV(buffer, resources) {
 function decodeResourceTLV(buffer, resource) {
   const decodedResource = decodeTLV(buffer);
   let resourceValue;
-
   if (resource.identifier !== decodedResource.identifier) {
     throw Error('Decoded resource TLV identifier and description identifiers do not match');
   }
@@ -499,6 +496,7 @@ module.exports = {
   decodeResourceValue,
   encodeResourceTLV,
   decodeResourceTLV,
+  encodeResourceInstanceTLV,
   decodeResourceInstanceTLV,
   encodeObjectInstanceTLV,
   decodeObjectInstanceTLV,
