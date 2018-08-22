@@ -448,6 +448,7 @@ function decodeObjectInstanceTLV(buffer, objectInstance) {
     decodedResources.push(decodedResource);
     index += decodedResource.tlvSize;
   }
+
   return {
     identifier: objectInstance.identifier,
     resources: decodedResources,
