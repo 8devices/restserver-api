@@ -42,7 +42,7 @@ describe('LwM2M TLV', () => {
     it('should throw an error when given start index is larger than end index', (done) => {
       try {
         const buffer = Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05, 0x06]);
-        changeBuffer(buffer, 12, 8);
+        changeBuffer(buffer, 12, 6);
       } catch (e) {
         done();
       }
@@ -102,191 +102,199 @@ describe('LwM2M TLV', () => {
         done();
       }
     });
-
-    it('should encode integer (0)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.INTEGER,
-        value: 0
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x00]));
-    });
-
-    it('should encode integer (1)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.INTEGER,
-        value: 1
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x01]));
-    });
-
-    it('should encode integer (-1)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.INTEGER,
-        value: -1
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0xff]));
-    });
-
-    it('should encode integer (2^7 - 1)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.INTEGER,
-        value: 127
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x7f]));
-    });
-
-    it('should encode integer (-2^7)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.INTEGER,
-        value: -128
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x80]));
-    });
-
-    it('should encode integer (2^7)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.INTEGER,
-        value: 128
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x00, 0x80]));
-    });
-
-    it('should encode integer (2^15 - 1)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.INTEGER,
-        value: 32767
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x7f, 0xff]));
-    });
-
-    it('should encode integer (-2^15)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.INTEGER,
-        value: -0x8000
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x80, 0x00]));
-    });
-
-    it('should encode integer (2^15)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.INTEGER,
-        value: 0x8000
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x00, 0x00, 0x80, 0x00]));
-    });
-
-    it('should encode integer (2^31 - 1)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.INTEGER,
-        value: 0x7fffffff
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x7f, 0xff, 0xff, 0xff]));
-    });
-
-    it('should encode integer (-2^31)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.INTEGER,
-        value: -0x80000000
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x80, 0x00, 0x00, 0x00]));
-    });
-
-    it('should throw an error if resource type is set to integer and value is not a number', (done) => {
-      try {
+    
+    describe('Resource type: integer', () => {
+      it('should encode integer (0)', () => {
         const res = {
           type: TLV.RESOURCE_TYPE.INTEGER,
-          value: 'NAN'
+          value: 0
         };
-        encode(res);
-      } catch (e) {
-        done();
-      }
-    });
 
-    it('should throw an error if value is set as 64-bit integer', (done) => {
-      try {
+        expect(encode(res)).to.be.eql(Buffer.from([0x00]));
+      });
+
+      it('should encode integer (1)', () => {
         const res = {
           type: TLV.RESOURCE_TYPE.INTEGER,
-          value: 0x7ffffffff
+          value: 1
         };
-        encode(res);
-      } catch (e) {
-        done();
-      }
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x01]));
+      });
+
+      it('should encode integer (-1)', () => {
+        const res = {
+          type: TLV.RESOURCE_TYPE.INTEGER,
+          value: -1
+        };
+
+        expect(encode(res)).to.be.eql(Buffer.from([0xff]));
+      });
+
+      it('should encode integer (2^7 - 1)', () => {
+        const res = {
+          type: TLV.RESOURCE_TYPE.INTEGER,
+          value: 127
+        };
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x7f]));
+      });
+
+      it('should encode integer (-2^7)', () => {
+        const res = {
+          type: TLV.RESOURCE_TYPE.INTEGER,
+          value: -128
+        };
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x80]));
+      });
+
+      it('should encode integer (2^7)', () => {
+        const res = {
+          type: TLV.RESOURCE_TYPE.INTEGER,
+          value: 128
+        };
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x00, 0x80]));
+      });
+
+      it('should encode integer (2^15 - 1)', () => {
+        const res = {
+          type: TLV.RESOURCE_TYPE.INTEGER,
+          value: 32767
+        };
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x7f, 0xff]));
+      });
+
+      it('should encode integer (-2^15)', () => {
+        const res = {
+          type: TLV.RESOURCE_TYPE.INTEGER,
+          value: -0x8000
+        };
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x80, 0x00]));
+      });
+
+      it('should encode integer (2^15)', () => {
+        const res = {
+          type: TLV.RESOURCE_TYPE.INTEGER,
+          value: 0x8000
+        };
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x00, 0x00, 0x80, 0x00]));
+      });
+
+      it('should encode integer (2^31 - 1)', () => {
+        const res = {
+          type: TLV.RESOURCE_TYPE.INTEGER,
+          value: 0x7fffffff
+        };
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x7f, 0xff, 0xff, 0xff]));
+      });
+
+      it('should encode integer (-2^31)', () => {
+        const res = {
+          type: TLV.RESOURCE_TYPE.INTEGER,
+          value: -0x80000000
+        };
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x80, 0x00, 0x00, 0x00]));
+      });
+
+      it('should throw an error if resource type is set to integer and value is not a number', (done) => {
+        try {
+          const res = {
+            type: TLV.RESOURCE_TYPE.INTEGER,
+            value: 'NAN'
+          };
+          encode(res);
+        } catch (e) {
+          done();
+        }
+      });
+
+      it('should throw an error if value is set as 64-bit integer', (done) => {
+        try {
+          const res = {
+            type: TLV.RESOURCE_TYPE.INTEGER,
+            value: 0x7ffffffff
+          };
+          encode(res);
+        } catch (e) {
+          done();
+        }
+      });
     });
 
-    it('should encode float (1.23)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.FLOAT,
-        value: 1.23
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x3f, 0x9d, 0x70, 0xa4]));
-    });
-
-    it('should throw an error if resource type is set to float and value is not a number', (done) => {
-      try {
+    describe('Resource type: float', () => {
+      it('should encode float (1.23)', () => {
         const res = {
           type: TLV.RESOURCE_TYPE.FLOAT,
-          value: 'NAN'
+          value: 1.23
         };
-        encode(res);
-      } catch (e) {
-        done();
-      }
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x3f, 0x9d, 0x70, 0xa4]));
+      });
+
+      it('should throw an error if resource type is set to float and value is not a number', (done) => {
+        try {
+          const res = {
+            type: TLV.RESOURCE_TYPE.FLOAT,
+            value: 'NAN'
+          };
+          encode(res);
+        } catch (e) {
+          done();
+        }
+      });
     });
 
-    it('should encode boolean (true)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.BOOLEAN,
-        value: true
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x01]));
-    });
-
-    it('should throw an error if resource type is set to boolean and value is not a boolean', (done) => {
-      try {
+    describe('Resource type: boolean', () => {
+      it('should encode boolean (true)', () => {
         const res = {
           type: TLV.RESOURCE_TYPE.BOOLEAN,
-          value: 'Not boolean'
+          value: true
         };
-        encode(res);
-      } catch (e) {
-        done();
-      }
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x01]));
+      });
+
+      it('should throw an error if resource type is set to boolean and value is not a boolean', (done) => {
+        try {
+          const res = {
+            type: TLV.RESOURCE_TYPE.BOOLEAN,
+            value: 'Not boolean'
+          };
+          encode(res);
+        } catch (e) {
+          done();
+        }
+      });
     });
 
-    it('should encode string (text)', () => {
-      const res = {
-        type: TLV.RESOURCE_TYPE.STRING,
-        value: 'text'
-      };
-
-      expect(encode(res)).to.be.eql(Buffer.from([0x74, 0x65, 0x78, 0x74]));
-    });
-
-    it('should throw an error if resource type is set to string and value is not a string', (done) => {
-      try {
+    describe('Resource type: string', () => {
+      it('should encode string (text)', () => {
         const res = {
           type: TLV.RESOURCE_TYPE.STRING,
-          value: 123
+          value: 'text'
         };
-        encode(res);
-      } catch (e) {
-        done();
-      }
+
+        expect(encode(res)).to.be.eql(Buffer.from([0x74, 0x65, 0x78, 0x74]));
+      });
+
+      it('should throw an error if resource type is set to string and value is not a string', (done) => {
+        try {
+          const res = {
+            type: TLV.RESOURCE_TYPE.STRING,
+            value: 123
+          };
+          encode(res);
+        } catch (e) {
+          done();
+        }
+      });
     });
   });
 
@@ -448,7 +456,7 @@ describe('LwM2M TLV', () => {
       expect(decoded.tlvSize).to.be.eql(4);
     });
 
-    it('should decode resource and return its identifier, type, value, tlv size', () => {
+    it('should decode multiple resources and return its identifier, type, value, tlv size', () => {
       const buffer = Buffer.from([0xa6, 0x16, 0xda, 0x41, 0x00, 0x01, 0x41, 0x01, 0x00]);
       const res = {
         identifier: 5850,
@@ -460,6 +468,87 @@ describe('LwM2M TLV', () => {
       expect(decoded.type).to.be.eql(1);
       expect(decoded.value).to.be.eql([true, false]);
       expect(decoded.tlvSize).to.be.eql(9);
+    });
+  });
+
+  describe('encodeObjectTLV', () => {
+    const encode = TLV.encodeObject;
+    it('should decode object with its instaces and resources', () => {
+      const obj = {
+        identifier: 3305,
+        objectInstances: [{
+          identifier: 0,
+          resources: [
+            {
+              identifier: 5800,
+              type: TLV.RESOURCE_TYPE.FLOAT,
+              value: 0
+            },
+            {
+              identifier: 5805,
+              type: TLV.RESOURCE_TYPE.FLOAT,
+              value: 0
+            },
+            {
+              identifier: 5810,
+              type: TLV.RESOURCE_TYPE.FLOAT,
+              value: 0
+            },
+            {
+              identifier: 5815,
+              type: TLV.RESOURCE_TYPE.FLOAT,
+              value: 0
+            },
+          ]
+        }]
+      };
+      const encoded = encode(obj);
+      const buffer = Buffer.from([0x08, 0x00, 0x1c,
+        0xe4, 0x16, 0xa8, 0x00, 0x00, 0x00, 0x00,
+        0xe4, 0x16, 0xad, 0x00, 0x00, 0x00, 0x00,
+        0xe4, 0x16, 0xb2, 0x00, 0x00, 0x00, 0x00,
+        0xe4, 0x16, 0xb7, 0x00, 0x00, 0x00, 0x00]);
+      expect(encoded).to.be.eql(buffer);
+    });
+  });
+
+  describe('decodeObjectTLV', () => {
+    const decode = TLV.decodeObject;
+    it('should decode object with its instaces and resources', () => {
+      const buffer = Buffer.from([0x08, 0x00, 0x1c,
+        0xe4, 0x16, 0xa8, 0x00, 0x00, 0x00, 0x00,
+        0xe4, 0x16, 0xad, 0x00, 0x00, 0x00, 0x00,
+        0xe4, 0x16, 0xb2, 0x00, 0x00, 0x00, 0x00,
+        0xe4, 0x16, 0xb7, 0x00, 0x00, 0x00, 0x00]);
+      const obj = {
+        identifier: 3305,
+        objectInstances: [{
+          identifier: 0,
+          resources: [
+            {
+              identifier: 5800,
+              type: TLV.RESOURCE_TYPE.FLOAT,
+            },
+            {
+              identifier: 5805,
+              type: TLV.RESOURCE_TYPE.FLOAT,
+            },
+            {
+              identifier: 5810,
+              type: TLV.RESOURCE_TYPE.FLOAT,
+            },
+            {
+              identifier: 5815,
+              type: TLV.RESOURCE_TYPE.FLOAT,
+            },
+          ]
+        }]
+      };
+      const decoded = decode(buffer, obj);
+      expect(decoded.objectInstances[0].resources[0].value).to.be.eql(0);
+      expect(decoded.objectInstances[0].resources[1].value).to.be.eql(0);
+      expect(decoded.objectInstances[0].resources[2].value).to.be.eql(0);
+      expect(decoded.objectInstances[0].resources[3].value).to.be.eql(0);
     });
   });
 });
