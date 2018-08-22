@@ -1,6 +1,7 @@
 const chai = require('chai');
 
 const { expect } = chai;
+
 const { TLV } = require('../lwm2m');
 
 describe('LwM2M TLV', () => {
@@ -63,10 +64,6 @@ describe('LwM2M TLV', () => {
         done();
       }
     });
-  });
-
-  describe('getDictionaryByValue', () => {
-
   });
 
   describe('encodeResourceValue', () => {
