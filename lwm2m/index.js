@@ -3,9 +3,6 @@ const lwm2m = require('./lwm2m.js');
 module.exports.TLV = {
   TYPE: lwm2m.TYPE,
   RESOURCE_TYPE: lwm2m.RESOURCE_TYPE,
-  binaryToInteger: lwm2m.binaryToInteger,
-  binaryToBitString: lwm2m.binaryToBitString,
-  changeBufferSize: lwm2m.changeBufferSize,
   getDictionaryByValue: lwm2m.getDictionaryByValue,
   encode: lwm2m.encodeTLV,
   decode: lwm2m.decodeTLV,

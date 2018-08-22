@@ -488,9 +488,6 @@ function decodeObjectTLV(buffer, object) {
 module.exports = {
   TYPE,
   RESOURCE_TYPE,
-  binaryToInteger,
-  binaryToBitString,
-  changeBufferSize,
   getDictionaryByValue,
   encodeTLV,
   decodeTLV,
