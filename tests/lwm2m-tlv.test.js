@@ -19,6 +19,18 @@ describe('LwM2M TLV', () => {
       }
     });
 
+    it('should throw an error if resource type is a number which is not defined in resource type dictionary', (done) => {
+      try {
+        const res = {
+          value: 'NAN',
+          type: 99
+        };
+        encode(res);
+      } catch (e) {
+        done();
+      }
+    });
+
     it('should return empty buffer if resource type is set to none', () => {
       const res = {
         type: TLV.RESOURCE_TYPE.NONE,
@@ -225,6 +237,28 @@ describe('LwM2M TLV', () => {
         done();
       }
     });
+
+    it('should handle opaque (Buffer <0x74, 0x65, 0x78, 0x74>)', () => {
+      const buffer = Buffer.from([0x74, 0x65, 0x78, 0x74]);
+      const res = {
+        type: TLV.RESOURCE_TYPE.OPAQUE,
+        value: buffer
+      };
+
+      expect(encode(res)).to.be.eql(buffer);
+    });
+
+    it('should throw an error if resource type is set to opaque and value is not a buffer', (done) => {
+      try {
+        const res = {
+          type: TLV.RESOURCE_TYPE.OPAQUE,
+          value: 'text'
+        };
+        encode(res);
+      } catch (e) {
+        done();
+      }
+    });
   });
 
   describe('decodeResourceValue', () => {
@@ -307,6 +341,18 @@ describe('LwM2M TLV', () => {
       }
     });
 
+    it('should throw an error if resource type is a number which is not defined in resource type dictionary', (done) => {
+      try {
+        const buffer = Buffer.from([0x3f, 0x9d, 0x70, 0xa4]);
+        const res = {
+          type: 99,
+        };
+        decode(buffer, res);
+      } catch (e) {
+        done();
+      }
+    });
+
     it('should decode buffer to string', () => {
       const buffer = Buffer.from([0x74, 0x65, 0x78, 0x74]);
       const res = {
@@ -323,6 +369,15 @@ describe('LwM2M TLV', () => {
       };
 
       expect(decode(buffer, res)).to.be.eql(true);
+    });
+
+    it('should decode opaque buffer to bit string', () => {
+      const buffer = Buffer.from([0x02]);
+      const res = {
+        type: TLV.RESOURCE_TYPE.OPAQUE,
+      };
+
+      expect(decode(buffer, res)).to.be.eql('10');
     });
   });
 
