@@ -102,7 +102,7 @@ describe('LwM2M TLV', () => {
         done();
       }
     });
-    
+
     describe('Resource type: integer', () => {
       it('should encode integer (0)', () => {
         const res = {
@@ -423,20 +423,9 @@ describe('LwM2M TLV', () => {
         type: TLV.RESOURCE_TYPE.BOOLEAN,
         value: [true, false]
       };
+      const expectedBuffer = Buffer.from([0xa6, 0x16, 0xda, 0x41, 0x00, 0x01, 0x41, 0x01, 0x00]);
       expect(typeof encode(res)).to.be.eql('object');
-    });
-  });
-
-  describe('encodeResourceInstanceTLV', () => {
-    const encode = TLV.encodeResourceInstance;
-    it('should encode resource instance and return a buffer', () => {
-      const res = {
-        identifier: 5850,
-        type: TLV.RESOURCE_TYPE.BOOLEAN,
-        value: true
-      };
-      expect(typeof encode(res)).to.be.eql('object');
-      expect(encode(res)).to.be.eql(Buffer.from([0x61, 0x16, 0xda, 0x01]));
+      expect(encode(res)).to.be.eql(expectedBuffer);
     });
   });
 
@@ -471,9 +460,40 @@ describe('LwM2M TLV', () => {
     });
   });
 
+  describe('encodeResourceInstanceTLV', () => {
+    const encode = TLV.encodeResourceInstance;
+    it('should encode resource instance and return a buffer', () => {
+      const res = {
+        identifier: 5850,
+        type: TLV.RESOURCE_TYPE.BOOLEAN,
+        value: true
+      };
+      expect(typeof encode(res)).to.be.eql('object');
+      expect(encode(res)).to.be.eql(Buffer.from([0x61, 0x16, 0xda, 0x01]));
+    });
+  });
+
+  describe('decodeResourceInstanceTLV', () => {
+    const decode = TLV.decodeResourceInstance;
+    it('should decode resource instance', () => {
+      const buffer = Buffer.from([0x61, 0x16, 0xda, 0x01]);
+      const res = {
+        identifier: 5850,
+        type: TLV.RESOURCE_TYPE.BOOLEAN,
+      };
+      const decoded = decode(buffer, res);
+      expect(decoded).to.be.eql({
+        identifier: 5850,
+        tlvSize: 4,
+        type: TLV.RESOURCE_TYPE.BOOLEAN,
+        value: true
+      });
+    });
+  });
+
   describe('encodeObjectTLV', () => {
     const encode = TLV.encodeObject;
-    it('should decode object with its instaces and resources', () => {
+    it('should encode object with its instaces and resources', () => {
       const obj = {
         identifier: 3305,
         objectInstances: [{
