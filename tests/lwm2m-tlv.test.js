@@ -428,17 +428,17 @@ describe('LwM2M TLV', () => {
             {
               identifier: 5805,
               type: TLV.RESOURCE_TYPE.FLOAT,
-              value: 0
+              value: 1
             },
             {
               identifier: 5810,
               type: TLV.RESOURCE_TYPE.FLOAT,
-              value: 0
+              value: 1.23
             },
             {
               identifier: 5815,
               type: TLV.RESOURCE_TYPE.FLOAT,
-              value: 0
+              value: 999.99
             },
           ]
         }]
@@ -446,9 +446,9 @@ describe('LwM2M TLV', () => {
       const encoded = encode(obj);
       const buffer = Buffer.from([0x08, 0x00, 0x1c,
         0xe4, 0x16, 0xa8, 0x00, 0x00, 0x00, 0x00,
-        0xe4, 0x16, 0xad, 0x00, 0x00, 0x00, 0x00,
-        0xe4, 0x16, 0xb2, 0x00, 0x00, 0x00, 0x00,
-        0xe4, 0x16, 0xb7, 0x00, 0x00, 0x00, 0x00]);
+        0xe4, 0x16, 0xad, 0x3f, 0x80, 0x00, 0x00,
+        0xe4, 0x16, 0xb2, 0x3f, 0x9d, 0x70, 0xa4,
+        0xe4, 0x16, 0xb7, 0x44, 0x79, 0xff, 0x5c]);
       expect(encoded).to.be.eql(buffer);
     });
   });
