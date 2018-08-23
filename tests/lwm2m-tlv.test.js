@@ -381,6 +381,88 @@ describe('LwM2M TLV', () => {
     });
   });
 
+  describe('encodeTLV', () => {
+    const { encode } = TLV;
+    it('should encode resource with 8 bit value length and return a buffer', () => {
+      const res = {
+        identifier: 5850,
+        type: TLV.TYPE.RESOURCE,
+        value: Buffer.alloc(256),
+      };
+      const encoded = encode(res);
+      const expectedBuffer = Buffer.concat([
+        Buffer.from([0xF0, 0x16, 0xda, 0x01, 0x00]),
+        Buffer.alloc(256)
+      ]);
+      expect(encoded).to.be.eql(expectedBuffer);
+    });
+
+    it('should encode resource with 16 bit value length and return a buffer', () => {
+      const res = {
+        identifier: 5850,
+        type: TLV.TYPE.RESOURCE,
+        value: Buffer.alloc(235645),
+      };
+      const encoded = encode(res);
+      const expectedBuffer = Buffer.concat([
+        Buffer.from([0xF8, 0x16, 0xda, 0x03, 0x98, 0x7d]),
+        Buffer.alloc(235645)
+      ]);
+      expect(encoded).to.be.eql(expectedBuffer);
+    });
+
+    it('should throw an error if given value is not a buffer', (done) => {
+      try {
+        const res = {
+          identifier: 5850,
+          value: 'Not a buffer'
+        };
+        encode(res);
+      } catch (e) {
+        done();
+      }
+    });
+
+    it('should throw an error if given identifier is not a buffer', (done) => {
+      try {
+        const res = {
+          identifier: 'NAN',
+          value: Buffer.from([0x74, 0x65, 0x78, 0x74])
+        };
+        encode(res);
+      } catch (e) {
+        done();
+      }
+    });
+  });
+
+  describe('decodeTLV', () => {
+    const { decode } = TLV;
+    it('should throw an error if given value is not a buffer', (done) => {
+      try {
+        const res = {
+          identifier: 5850,
+          value: 'Not a buffer'
+        };
+        decode(res);
+      } catch (e) {
+        done();
+      }
+    });
+
+    it('should throw an error if given identifier is not a buffer', (done) => {
+      try {
+        const res = {
+          identifier: 'NAN',
+          value: Buffer.from([0x74, 0x65, 0x78, 0x74])
+        };
+        decode(res);
+      } catch (e) {
+        done();
+      }
+    });
+  });
+
   describe('encodeResourceTLV', () => {
     const encode = TLV.encodeResource;
     it('should encode resource and return a buffer', () => {
