@@ -440,23 +440,8 @@ describe('LwM2M TLV', () => {
     const { decode } = TLV;
     it('should throw an error if given value is not a buffer', (done) => {
       try {
-        const res = {
-          identifier: 5850,
-          value: 'Not a buffer'
-        };
-        decode(res);
-      } catch (e) {
-        done();
-      }
-    });
-
-    it('should throw an error if given identifier is not a buffer', (done) => {
-      try {
-        const res = {
-          identifier: 'NAN',
-          value: Buffer.from([0x74, 0x65, 0x78, 0x74])
-        };
-        decode(res);
+        const buffer = 'Not a buffer';
+        decode(buffer);
       } catch (e) {
         done();
       }
