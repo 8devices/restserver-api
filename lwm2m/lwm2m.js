@@ -174,7 +174,7 @@ function decodeResourceValue(buffer, resource) {
       return binaryToBitString(buffer) !== '0';
 
     case RESOURCE_TYPE.OPAQUE:
-      return binaryToBitString(buffer);
+      return buffer;
 
     default:
       throw Error(`Unrecognised resource type (${resource.type})`);
