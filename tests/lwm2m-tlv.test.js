@@ -296,7 +296,7 @@ describe('LwM2M TLV', () => {
         type: TLV.RESOURCE_TYPE.INTEGER,
       };
 
-      expect(decode(buffer, res)).to.be.eql(2147483647);
+      expect(decode(buffer, res)).to.be.eql(0x7FFFFFFF);
     });
 
     it('should throw an error if given buffer length does not meet 8, 16, 32 bit integer', (done) => {
@@ -371,19 +371,19 @@ describe('LwM2M TLV', () => {
       expect(decode(buffer, res)).to.be.eql(true);
     });
 
-    it('should decode opaque buffer to bit string', () => {
+    it('should handle opaque resource type and return buffer', () => {
       const buffer = Buffer.from([0x02]);
       const res = {
         type: TLV.RESOURCE_TYPE.OPAQUE,
       };
 
-      expect(decode(buffer, res)).to.be.eql('10');
+      expect(decode(buffer, res)).to.be.eql(Buffer.from([0x02]));
     });
   });
 
   describe('encodeTLV', () => {
     const { encode } = TLV;
-    it('should encode resource with 8 bit value length and return a buffer', () => {
+    it('should encode resource with 16 bit value length and return a buffer', () => {
       const res = {
         identifier: 5850,
         type: TLV.TYPE.RESOURCE,
@@ -397,16 +397,16 @@ describe('LwM2M TLV', () => {
       expect(encoded).to.be.eql(expectedBuffer);
     });
 
-    it('should encode resource with 16 bit value length and return a buffer', () => {
+    it('should encode resource with 24 bit value length and return a buffer', () => {
       const res = {
         identifier: 5850,
         type: TLV.TYPE.RESOURCE,
-        value: Buffer.alloc(235645),
+        value: Buffer.alloc(0x3987D),
       };
       const encoded = encode(res);
       const expectedBuffer = Buffer.concat([
         Buffer.from([0xF8, 0x16, 0xda, 0x03, 0x98, 0x7d]),
-        Buffer.alloc(235645)
+        Buffer.alloc(0x3987D)
       ]);
       expect(encoded).to.be.eql(expectedBuffer);
     });
@@ -415,6 +415,7 @@ describe('LwM2M TLV', () => {
       try {
         const res = {
           identifier: 5850,
+          type: TLV.TYPE.RESOURCE,
           value: 'Not a buffer'
         };
         encode(res);
@@ -423,10 +424,11 @@ describe('LwM2M TLV', () => {
       }
     });
 
-    it('should throw an error if given identifier is not a buffer', (done) => {
+    it('should throw an error if given identifier is not a number', (done) => {
       try {
         const res = {
           identifier: 'NAN',
+          type: TLV.TYPE.RESOURCE,
           value: Buffer.from([0x74, 0x65, 0x78, 0x74])
         };
         encode(res);
@@ -456,7 +458,6 @@ describe('LwM2M TLV', () => {
         type: TLV.RESOURCE_TYPE.BOOLEAN,
         value: true
       };
-      expect(typeof encode(res)).to.be.eql('object');
       expect(encode(res)).to.be.eql(Buffer.from([0xe1, 0x16, 0xda, 0x01]));
     });
 
@@ -467,7 +468,6 @@ describe('LwM2M TLV', () => {
         value: [true, false]
       };
       const expectedBuffer = Buffer.from([0xa6, 0x16, 0xda, 0x41, 0x00, 0x01, 0x41, 0x01, 0x00]);
-      expect(typeof encode(res)).to.be.eql('object');
       expect(encode(res)).to.be.eql(expectedBuffer);
     });
   });
@@ -511,7 +511,6 @@ describe('LwM2M TLV', () => {
         type: TLV.RESOURCE_TYPE.BOOLEAN,
         value: true
       };
-      expect(typeof encode(res)).to.be.eql('object');
       expect(encode(res)).to.be.eql(Buffer.from([0x61, 0x16, 0xda, 0x01]));
     });
   });
