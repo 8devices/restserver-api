@@ -1,3 +1,6 @@
+/**
+ * LwM2M variable types (OBJECT_INSTANCE, MULTIPLE_RESOURCE, RESOURCE_INSTANCE, RESOURCE).
+*/
 const TYPE = {
   OBJECT_INSTANCE: 0b00,
   MULTIPLE_RESOURCE: 0b10,
@@ -5,6 +8,9 @@ const TYPE = {
   RESOURCE: 0b11,
 };
 
+/**
+ * Represents resource type (NONE, BOOLEAN, INTEGER, FLOAT, STRING, OPAQUE).
+ */
 const RESOURCE_TYPE = {
   NONE: 0,
   BOOLEAN: 1,
@@ -54,6 +60,19 @@ function getDictionaryByValue(dictionaryList, keyName, value) {
   return dictionaryList.find(dictionary => (dictionary[keyName] === value));
 }
 
+/**
+ * Encodes value of the resource.
+ * @param {object} resource - LwM2M resource as an object with value and it's type.
+ * @returns {object} buffer - Encoded buffer in TLV format
+ * @example
+ * const resource = {
+ *  type: TLV.RESOURCE_TYPE.INTEGER,
+ *  value: 1
+ * };
+ * 
+ * const encodedValue = encode(resource);
+ * // encodedValue = <Buffer 01>
+ */
 function encodeResourceValue(resource) {
   const MIN_INT8 = -0x80;
   const MAX_INT8 = 0x7f;
