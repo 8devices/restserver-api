@@ -10,7 +10,7 @@ const ip = require('ip');
  * This class represents endpoint (device).
    * @example
    * const restAPI = require('restserver-api');
-   * 
+   *
    * const service = new restAPI.Service(serviceOptions);
    * const endpoint = new restAPI.Endpoint(service, 'endpointId');
  */
