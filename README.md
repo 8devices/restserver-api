@@ -12,6 +12,68 @@
 </dd>
 </dl>
 
+## Constants
+
+<dl>
+<dt><a href="#TYPE">TYPE</a></dt>
+<dd><p>Represents LwM2M variable (identifier) types (OBJECT_INSTANCE,
+MULTIPLE_RESOURCE, RESOURCE_INSTANCE, RESOURCE).</p>
+</dd>
+<dt><a href="#RESOURCE_TYPE">RESOURCE_TYPE</a></dt>
+<dd><p>Represents resource type (NONE, BOOLEAN, INTEGER, FLOAT, STRING, OPAQUE).</p>
+</dd>
+</dl>
+
+## Functions
+
+<dl>
+<dt><a href="#getDictionaryByValue">getDictionaryByValue(dictionaryList, keyName, value)</a> ⇒ <code>Object</code> | <code>string</code> | <code>number</code></dt>
+<dd><p>Gets dictionary by given name of the key and value.</p>
+</dd>
+<dt><a href="#encodeResourceValue">encodeResourceValue(resource)</a> ⇒ <code>object</code></dt>
+<dd><p>Encodes value of the resource.</p>
+</dd>
+<dt><a href="#decodeResourceValue">decodeResourceValue(buffer, resource)</a> ⇒ <code>Object</code> | <code>string</code> | <code>number</code> | <code>boolean</code></dt>
+<dd><p>Decodes value of the resource.</p>
+</dd>
+<dt><a href="#encodeTLV">encodeTLV(object)</a> ⇒ <code>object</code></dt>
+<dd><p>Encodes ant type of instance (Object instance, multiple resources, resources instance, resource).</p>
+</dd>
+<dt><a href="#encodeResourceInstanceTLV">encodeResourceInstanceTLV(resourceInstance)</a> ⇒ <code>object</code></dt>
+<dd><p>Encodes resource instance to TLV buffer.</p>
+</dd>
+<dt><a href="#encodeMultipleResourcesTLV">encodeMultipleResourcesTLV(resources)</a> ⇒ <code>object</code></dt>
+<dd><p>Encodes multiple resource values to TLV buffer.</p>
+</dd>
+<dt><a href="#encodeResourceTLV">encodeResourceTLV(resource)</a> ⇒ <code>object</code></dt>
+<dd><p>Encodes resource to TLV buffer.</p>
+</dd>
+<dt><a href="#encodeObjectInstanceTLV">encodeObjectInstanceTLV(objectInstance)</a> ⇒ <code>object</code></dt>
+<dd><p>Encodes LwM2M object instance to TLV buffer.</p>
+</dd>
+<dt><a href="#encodeObjectTLV">encodeObjectTLV(object)</a> ⇒ <code>object</code></dt>
+<dd><p>Encodes LwM2M object to TLV buffer.</p>
+</dd>
+<dt><a href="#decodeTLV">decodeTLV(buffer)</a> ⇒ <code>object</code></dt>
+<dd><p>Decodes any TLV buffer.</p>
+</dd>
+<dt><a href="#decodeResourceInstanceTLV">decodeResourceInstanceTLV(buffer, resources)</a> ⇒ <code>object</code></dt>
+<dd><p>Decodes resource instance.</p>
+</dd>
+<dt><a href="#decodeResourceInstanceValue">decodeResourceInstanceValue(buffer, resourceInstance)</a> ⇒ <code>object</code></dt>
+<dd><p>Decodes resource instance value</p>
+</dd>
+<dt><a href="#decodeResourceTLV">decodeResourceTLV(buffer, resource)</a> ⇒ <code>object</code></dt>
+<dd><p>Decodes resource.</p>
+</dd>
+<dt><a href="#decodeObjectInstanceTLV">decodeObjectInstanceTLV(buffer, objectInstance)</a> ⇒ <code>object</code></dt>
+<dd><p>Decodes object instance from TLV buffer.</p>
+</dd>
+<dt><a href="#decodeObjectTLV">decodeObjectTLV(buffer, object)</a> ⇒ <code>object</code></dt>
+<dd><p>Encodes LwM2M object to TLV buffer.</p>
+</dd>
+</dl>
+
 <a name="Endpoint"></a>
 
 ## Endpoint
@@ -42,6 +104,13 @@ responses" and emits "register", "update", "deregister" events.
 | service | <code>object</code> | Service object |
 | id | <code>string</code> | Endpoint id |
 
+**Example**  
+```js
+const restAPI = require('restserver-api');
+
+const service = new restAPI.Service(serviceOptions);
+const endpoint = new restAPI.Endpoint(service, 'endpointId');
+```
 <a name="Endpoint+getObjects"></a>
 
 ### endpoint.getObjects() ⇒ <code>Promise</code>
@@ -450,3 +519,399 @@ Performs POST requests with given path, data and data type.
 | argument | <code>object</code> |  | Data which will be sent (optional) |
 | type | <code>string</code> | <code>&quot;application/vnd.oma.lwm2m+tlv&quot;</code> | Data type (optional) |
 
+<a name="TYPE"></a>
+
+## TYPE
+Represents LwM2M variable (identifier) types (OBJECT_INSTANCE,
+MULTIPLE_RESOURCE, RESOURCE_INSTANCE, RESOURCE).
+
+**Kind**: global constant  
+<a name="RESOURCE_TYPE"></a>
+
+## RESOURCE_TYPE
+Represents resource type (NONE, BOOLEAN, INTEGER, FLOAT, STRING, OPAQUE).
+
+**Kind**: global constant  
+<a name="getDictionaryByValue"></a>
+
+## getDictionaryByValue(dictionaryList, keyName, value) ⇒ <code>Object</code> \| <code>string</code> \| <code>number</code>
+Gets dictionary by given name of the key and value.
+
+**Kind**: global function  
+**Returns**: <code>Object</code> \| <code>string</code> \| <code>number</code> - dictionary  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| dictionaryList | <code>object</code> | Dictionary list. |
+| keyName | <code>Object</code> \| <code>string</code> | Name of the key |
+| value | <code>Object</code> \| <code>string</code> \| <code>number</code> | Value |
+
+<a name="encodeResourceValue"></a>
+
+## encodeResourceValue(resource) ⇒ <code>object</code>
+Encodes value of the resource.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - buffer - Buffer of encoded value.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resource | <code>object</code> | Object which stores resource value and value's type. |
+
+**Example**  
+```js
+const resource = {
+ type: TLV.RESOURCE_TYPE.INTEGER,
+ value: 1
+};
+
+const encodedValue = encodeResourceValue(resource);
+// encodedValue = <Buffer 01>
+```
+<a name="decodeResourceValue"></a>
+
+## decodeResourceValue(buffer, resource) ⇒ <code>Object</code> \| <code>string</code> \| <code>number</code> \| <code>boolean</code>
+Decodes value of the resource.
+
+**Kind**: global function  
+**Returns**: <code>Object</code> \| <code>string</code> \| <code>number</code> \| <code>boolean</code> - value - Decoded value in specified type  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| buffer | <code>object</code> | Buffer which will be decoded. |
+| resource | <code>object</code> | Object which stores resource value's type. |
+
+**Example**  
+```js
+const buffer = Buffer.from([0x01]);
+const resource = {
+  type: TLV.RESOURCE_TYPE.INTEGER,
+};
+
+const decodedValue = decodeResourceValue(buffer, resource);
+// decodedValue = 1
+```
+<a name="encodeTLV"></a>
+
+## encodeTLV(object) ⇒ <code>object</code>
+Encodes ant type of instance (Object instance, multiple resources, resources instance, resource).
+
+**Kind**: global function  
+**Returns**: <code>object</code> - buffer - encoded TLV buffer.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| object | <code>object</code> | object which stores type, identifier and value. |
+
+**Example**  
+```js
+const resource = {
+  identifier: 5850,
+  type: TLV.RESOURCE_TYPE.BOOLEAN,
+  value: true
+};
+
+const encoded = encode({
+  type: TYPE.RESOURCE,
+  identifier: resource.identifier,
+  value: encodeResourceValue(resource),
+});
+// encoded = <Buffer e1 16 da 01>
+```
+<a name="encodeResourceInstanceTLV"></a>
+
+## encodeResourceInstanceTLV(resourceInstance) ⇒ <code>object</code>
+Encodes resource instance to TLV buffer.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - buffer - Buffer in TLV format  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceInstance | <code>object</code> | Object which stores resource identifier, value and it's type. |
+
+**Example**  
+```js
+const resourceInstance = {
+  identifier: 5850,
+  type: TLV.RESOURCE_TYPE.BOOLEAN,
+  value: true
+};
+
+const encoded = encodeResourceInstance(resourceInstance);
+// encoded = <Buffer e1 16 da 01>
+```
+<a name="encodeMultipleResourcesTLV"></a>
+
+## encodeMultipleResourcesTLV(resources) ⇒ <code>object</code>
+Encodes multiple resource values to TLV buffer.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - buffer - TLV buffer.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resources | <code>object</code> | Object which stores identifier, resource type, and multiple values. |
+
+**Example**  
+```js
+const resources = {
+  identifier: 5850,
+  type: TLV.RESOURCE_TYPE.BOOLEAN,
+  value: [true, false]
+};
+
+const encoded = encodeMultipleResources(resources);
+// encoded = <Buffer a6 16 da 41 00 01 41 01 00>
+```
+<a name="encodeResourceTLV"></a>
+
+## encodeResourceTLV(resource) ⇒ <code>object</code>
+Encodes resource to TLV buffer.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - buffer - TLV buffer.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resource | <code>object</code> | Object which stores resource identifier, type and value. |
+
+**Example**  
+```js
+const resource = {
+  identifier: 5850,
+  type: TLV.RESOURCE_TYPE.BOOLEAN,
+  value: true
+};
+
+const encoded = encodeResourcez(resource);
+// encoded = <Buffer e1 16 da 01>
+```
+<a name="encodeObjectInstanceTLV"></a>
+
+## encodeObjectInstanceTLV(objectInstance) ⇒ <code>object</code>
+Encodes LwM2M object instance to TLV buffer.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - buffer - TLV buffer.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| objectInstance | <code>object</code> | LwM2M object. |
+
+**Example**  
+```js
+const objectInstance = {
+  identifier: 0,
+  resources: [
+    {
+      identifier: 5815,
+      type: TLV.RESOURCE_TYPE.FLOAT,
+      value: 999.99
+    }
+  ]
+};
+
+const encoded = encodeObjectInstanceTLV(objectInstance);
+// encoded = <Buffer 07 00 e4 16 b7 44 79 ff 5c>
+```
+<a name="encodeObjectTLV"></a>
+
+## encodeObjectTLV(object) ⇒ <code>object</code>
+Encodes LwM2M object to TLV buffer.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - buffer - TLV buffer.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| object | <code>object</code> | LwM2M object. |
+
+**Example**  
+```js
+const object = {
+  identifier: 3305,
+  objectInstances: [{
+    identifier: 0,
+    resources: [
+      {
+        identifier: 5815,
+        type: TLV.RESOURCE_TYPE.FLOAT,
+        value: 999.99
+      }
+    ]
+  }]
+};
+
+const encoded = encodeObject(object);
+// encoded = <Buffer 07 00 e4 16 b7 44 79 ff 5c>
+```
+<a name="decodeTLV"></a>
+
+## decodeTLV(buffer) ⇒ <code>object</code>
+Decodes any TLV buffer.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - object - Decoded object.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| buffer | <code>object</code> | encoded TLV buffer. |
+
+**Example**  
+```js
+const buffer = Buffer.from([0xe1, 0x16, 0xda, 0x01]);
+
+const decoded = TLV.decode(buffer);
+// decoded = { type: 3, identifier: 5850, value: <Buffer 01>, tlvSize: 4 }
+```
+<a name="decodeResourceInstanceTLV"></a>
+
+## decodeResourceInstanceTLV(buffer, resources) ⇒ <code>object</code>
+Decodes resource instance.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - decodedResource - Object which stores resource identifier,
+tlvSize resource type and value.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| buffer | <code>object</code> | Resource instance TLV buffer. |
+| resources | <code>object</code> | Object which stores resource identifier and resource type. |
+
+**Example**  
+```js
+const buffer = Buffer.from([0x61, 0x16, 0xda, 0x01]);
+const resources = {
+  identifier: 5850,
+  type: TLV.RESOURCE_TYPE.BOOLEAN,
+};
+
+const decoded = decodeResourceInstance(buffer, resources);
+// decoded = { identifier: 5850, tlvSize: 4, type: TLV.RESOURCE_TYPE.BOOLEAN, value: true }
+```
+<a name="decodeResourceInstanceValue"></a>
+
+## decodeResourceInstanceValue(buffer, resourceInstance) ⇒ <code>object</code>
+Decodes resource instance value
+
+**Kind**: global function  
+**Returns**: <code>object</code> - decodedResourceValue - Decoded resource value  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| buffer | <code>object</code> | Resource instance value TLV buffer |
+| resourceInstance | <code>object</code> | Object which stores resource type |
+
+**Example**  
+```js
+const buffer = Buffer.from([0x01]);
+const resourceInstance = {
+  type: TLV.RESOURCE_TYPE.INTEGER,
+};
+
+const decoded = decodeResourceInstance(buffer, resources);
+// decoded = 1
+```
+<a name="decodeResourceTLV"></a>
+
+## decodeResourceTLV(buffer, resource) ⇒ <code>object</code>
+Decodes resource.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - buffer - Decoded resource.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| buffer | <code>object</code> | Resource TLV buffer |
+| resource | <code>object</code> | Object which stores identifier and resource type. |
+
+**Example**  
+```js
+const buffer = Buffer.from([0xe1, 0x16, 0xda, 0x01]);
+const resource = {
+  identifier: 5850,
+  type: TLV.RESOURCE_TYPE.BOOLEAN,
+};
+
+const decoded = decodeResource(buffer, resource);
+// decoded = { identifier: 5850, type: 1, value: true, tlvSize: 4 }
+```
+<a name="decodeObjectInstanceTLV"></a>
+
+## decodeObjectInstanceTLV(buffer, objectInstance) ⇒ <code>object</code>
+Decodes object instance from TLV buffer.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - object - Decoded object instance.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| buffer | <code>object</code> | TLV buffer. |
+| objectInstance | <code>object</code> | Object which stores object instance identifier and resources. |
+
+**Example**  
+```js
+const buffer = Buffer.from([0x07, 0x00, 0xe4, 0x16, 0xb7, 0x44, 0x79, 0xff, 0x5c]);
+const objectInstance: {
+  identifier: 0,
+  resources: [
+    {
+      identifier: 5815,
+      type: TLV.RESOURCE_TYPE.FLOAT,
+    },
+  ]
+};
+
+const decoded = decodeObjectInstance(buffer, objectInstance);
+// decoded = { identifier: 0, resources: [ { identifier: 5815, type: 3 } ] }
+```
+<a name="decodeObjectTLV"></a>
+
+## decodeObjectTLV(buffer, object) ⇒ <code>object</code>
+Encodes LwM2M object to TLV buffer.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - object - Decoded object.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| buffer | <code>object</code> | TLV buffer. |
+| object | <code>object</code> | Object which stores object instances with their resources. |
+
+**Example**  
+```js
+const buffer = Buffer.from([0x07, 0x00, 0xe4, 0x16, 0xb7, 0x44, 0x79, 0xff, 0x5c]);
+const object = {
+  identifier: 3305,
+  objectInstances: [{
+    identifier: 0,
+    resources: [
+      {
+        identifier: 5815,
+        type: TLV.RESOURCE_TYPE.FLOAT,
+      },
+    ]
+  }]
+};
+
+const decoded = decodeObject(buffer, object);
+/*
+decoded = {
+  identifier: 3305,
+  objectInstances: [
+    {
+      identifier: 0,
+      resources: [
+        {
+          identifier: 5815,
+          type: 3,
+          value: 999.989990234375,
+          tlvSize: 7
+        }
+      ]
+    }
+  ]
+}
+*\/
+```
