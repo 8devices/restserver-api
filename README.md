@@ -9,6 +9,7 @@ const restAPI = require('restserver-api');
 const { Lwm2m } = restAPI;
 const { RESOURCE_TYPE, encodeResource, decodeResource } = Lwm2m.TLV;
 
+// Initializing service and endpoint
 const service = new restAPI.Service();
 const device = new restAPI.Device(service, "endpointName");
 
@@ -27,8 +28,8 @@ service.start().then(() => {
     // Recieved response with status
     // Stopping service
     service.stop();
-  }, tlvBuffer)
-})
+  }, tlvBuffer);
+});
 ```
 ## Classes
 
