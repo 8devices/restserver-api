@@ -1,34 +1,37 @@
 [![Build Status](https://travis-ci.org/8devices/restserver-api.svg?branch=master)](https://travis-ci.org/8devices/restserver-api)
 [![codecov](https://codecov.io/gh/8devices/restserver-api/branch/master/graph/badge.svg)](https://codecov.io/gh/8devices/restserver-api)
 # restserver-api
-**Runing example**
-This example shows simple operations from restserver-api.
+**Example program**
+This example shows basic restserver-api usage.
 ```js
 const restAPI = require('restserver-api');
 
 const { Lwm2m } = restAPI;
 const { RESOURCE_TYPE, encodeResource, decodeResource } = Lwm2m.TLV;
 
-// Initializing service and endpoint
+console.log('Initialize service and endpoint');
 const service = new restAPI.Service();
-const device = new restAPI.Device(service, "endpointName");
+const device = new restAPI.Device(service, 'urn:uuid:17200d69-ec9b-43b3-9051-73df2207907c');
 
-// encoding resource to TLV format
+console.log('Encode resource to TLV format');
 const tlvBuffer = encodeResource({
   identifier: 3,
   type: RESOURCE_TYPE.INTEGER,
   value: 60
 });
 
-// Starting service
+console.log('Start service');
 service.start().then(() => {
-  // Service started
-  // Writing into device's resource
-  endpoint.write(path, (status) => {
-    // Recieved response with status
-    // Stopping service
-    service.stop();
-  }, tlvBuffer);
+  console.log('Service started');
+  console.log('Writing into device\'s resource');
+  device.write('/3/0/7', (status) => {
+    console.log('Recieved response with status: ', status);
+  }, tlvBuffer).finally(() => {
+    console.log('Stopping service');
+    service.stop().then(() => {
+      console.log('Service stopped');
+    });
+  });
 });
 ```
 ## Classes
@@ -943,5 +946,5 @@ decoded = {
     }
   ]
 }
-*\/
+*/
 ```
