@@ -1,3 +1,5 @@
+const TLV = require('./tlv.js');
+
 module.exports = {
-  TLV: require('./tlv.js'),
+  TLV,
 };

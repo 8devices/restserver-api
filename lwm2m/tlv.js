@@ -62,38 +62,35 @@ function encodeResourceValue(resource) {
   const MIN_INT32 = -0x80000000;
   const MAX_INT32 = 0x7fffffff;
 
-  const type = resource.type;
-  const value = resource.value;
-
   let buffer;
 
-  if (typeof (type) !== 'number') {
-    throw Error(`Unrecognised type type (${typeof (type)})`);
+  if (typeof (resource.type) !== 'number') {
+    throw Error(`Unrecognised type (${typeof (resource.type)})`);
   }
 
-  switch (type) {
+  switch (resource.type) {
     case RESOURCE_TYPE.NONE:
-      if (typeof (value) !== 'number') {
-        throw Error(`Unrecognised value type (${typeof (value)})`);
+      if (typeof (resource.value) !== 'number') {
+        throw Error(`Unrecognised value type (${typeof (resource.value)})`);
       }
 
       return Buffer.from([]);
 
     case RESOURCE_TYPE.INTEGER:
-      if (typeof (value) !== 'number') {
-        throw Error(`Cannot encode ${typeof (value)} as integer`);
+      if (typeof (resource.value) !== 'number') {
+        throw Error(`Cannot encode ${typeof (resource.value)} as integer`);
       }
 
 
-      if (value >= MIN_INT8 && value <= MAX_INT8) {
+      if (resource.value >= MIN_INT8 && resource.value <= MAX_INT8) {
         buffer = Buffer.alloc(1);
-        buffer.writeInt8(value);
-      } else if (value >= MIN_INT16 && value <= MAX_INT16) {
+        buffer.writeInt8(resource.value);
+      } else if (resource.value >= MIN_INT16 && resource.value <= MAX_INT16) {
         buffer = Buffer.alloc(2);
-        buffer.writeInt16BE(value);
-      } else if (value >= MIN_INT32 && value <= MAX_INT32) {
+        buffer.writeInt16BE(resource.value);
+      } else if (resource.value >= MIN_INT32 && resource.value <= MAX_INT32) {
         buffer = Buffer.alloc(4);
-        buffer.writeInt32BE(value);
+        buffer.writeInt32BE(resource.value);
       } else {
         // XXX: this could be implemented with long.js module,
         // but until there's a real issue no need to add another dependency
@@ -103,38 +100,38 @@ function encodeResourceValue(resource) {
       return buffer;
 
     case RESOURCE_TYPE.FLOAT: {
-      if (typeof (value) !== 'number') {
-        throw Error(`Cannot encode ${typeof (value)} as float`);
+      if (typeof (resource.value) !== 'number') {
+        throw Error(`Cannot encode ${typeof (resource.value)} as float`);
       }
 
       buffer = Buffer.alloc(4);
-      buffer.writeFloatBE(value);
+      buffer.writeFloatBE(resource.value);
       return buffer;
     }
 
     case RESOURCE_TYPE.BOOLEAN:
-      if (typeof (value) !== 'boolean') {
-        throw Error(`Cannot encode ${typeof (value)} as boolean`);
+      if (typeof (resource.value) !== 'boolean') {
+        throw Error(`Cannot encode ${typeof (resource.value)} as boolean`);
       }
 
-      return value ? Buffer.from([1]) : Buffer.from([0]);
+      return resource.value ? Buffer.from([1]) : Buffer.from([0]);
 
     case RESOURCE_TYPE.STRING:
-      if (typeof (value) !== 'string') {
-        throw Error(`Cannot encode ${typeof (value)} as string`);
+      if (typeof (resource.value) !== 'string') {
+        throw Error(`Cannot encode ${typeof (resource.value)} as string`);
       }
 
-      return Buffer.from(value, 'ascii');
+      return Buffer.from(resource.value, 'ascii');
 
     case RESOURCE_TYPE.OPAQUE:
-      if (!(value instanceof Buffer)) {
-        throw Error(`Cannot encode ${typeof (value)} as Buffer`);
+      if (!(resource.value instanceof Buffer)) {
+        throw Error(`Cannot encode ${typeof (resource.value)} as Buffer`);
       }
 
-      return value;
+      return resource.value;
 
     default:
-      throw Error(`Unrecognised type (${type})`);
+      throw Error(`Unrecognised type (${resource.type})`);
   }
 }
 
