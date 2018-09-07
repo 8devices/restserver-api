@@ -25,13 +25,12 @@ service.start().then(() => {
   console.log('Service started');
   console.log('Writing into device\'s resource');
   device.write('/3/0/7', (status) => {
-    console.log('Recieved response with status: ', status);
-  }, tlvBuffer).finally(() => {
+    console.log('Received response with status: ', status);
     console.log('Stopping service');
     service.stop().then(() => {
       console.log('Service stopped');
     });
-  });
+  }, tlvBuffer);
 });
 ```
 ## Classes
@@ -69,41 +68,41 @@ MULTIPLE_RESOURCE, RESOURCE_INSTANCE, RESOURCE).</p>
 <dt><a href="#decodeResourceValue">decodeResourceValue(buffer, resource)</a> ⇒ <code>Object</code> | <code>string</code> | <code>number</code> | <code>boolean</code></dt>
 <dd><p>Decodes value of the resource.</p>
 </dd>
-<dt><a href="#encodeTLV">encodeTLV(object)</a> ⇒ <code>object</code></dt>
+<dt><a href="#encode">encode(object)</a> ⇒ <code>object</code></dt>
 <dd><p>Encodes ant type of instance (Object instance, multiple resources, resources instance, resource).</p>
 </dd>
-<dt><a href="#encodeResourceInstanceTLV">encodeResourceInstanceTLV(resourceInstance)</a> ⇒ <code>object</code></dt>
+<dt><a href="#encodeResourceInstance">encodeResourceInstance(resourceInstance)</a> ⇒ <code>object</code></dt>
 <dd><p>Encodes resource instance to TLV buffer.</p>
 </dd>
 <dt><a href="#encodeMultipleResourcesTLV">encodeMultipleResourcesTLV(resources)</a> ⇒ <code>object</code></dt>
 <dd><p>Encodes multiple resource values to TLV buffer.</p>
 </dd>
-<dt><a href="#encodeResourceTLV">encodeResourceTLV(resource)</a> ⇒ <code>object</code></dt>
+<dt><a href="#encodeResource">encodeResource(resource)</a> ⇒ <code>object</code></dt>
 <dd><p>Encodes resource to TLV buffer.</p>
 </dd>
-<dt><a href="#encodeObjectInstanceTLV">encodeObjectInstanceTLV(objectInstance)</a> ⇒ <code>object</code></dt>
+<dt><a href="#encodeObjectInstance">encodeObjectInstance(objectInstance)</a> ⇒ <code>object</code></dt>
 <dd><p>Encodes LwM2M object instance to TLV buffer.</p>
 </dd>
-<dt><a href="#encodeObjectTLV">encodeObjectTLV(object)</a> ⇒ <code>object</code></dt>
+<dt><a href="#encodeObject">encodeObject(object)</a> ⇒ <code>object</code></dt>
 <dd><p>Encodes LwM2M object to TLV buffer.</p>
 </dd>
-<dt><a href="#decodeTLV">decodeTLV(buffer)</a> ⇒ <code>object</code></dt>
+<dt><a href="#decode">decode(buffer)</a> ⇒ <code>object</code></dt>
 <dd><p>Decodes any TLV buffer.</p>
 </dd>
-<dt><a href="#decodeResourceInstanceTLV">decodeResourceInstanceTLV(buffer, resources)</a> ⇒ <code>object</code></dt>
+<dt><a href="#decodeResourceInstance">decodeResourceInstance(buffer, resources)</a> ⇒ <code>object</code></dt>
 <dd><p>Decodes resource instance.</p>
 </dd>
 <dt><a href="#decodeResourceInstanceValue">decodeResourceInstanceValue(buffer, resourceInstance)</a> ⇒ <code>object</code></dt>
 <dd><p>Decodes resource instance value</p>
 </dd>
-<dt><a href="#decodeResourceTLV">decodeResourceTLV(buffer, resource)</a> ⇒ <code>object</code></dt>
+<dt><a href="#decodeResource">decodeResource(buffer, resource)</a> ⇒ <code>object</code></dt>
 <dd><p>Decodes resource.</p>
 </dd>
-<dt><a href="#decodeObjectInstanceTLV">decodeObjectInstanceTLV(buffer, objectInstance)</a> ⇒ <code>object</code></dt>
+<dt><a href="#decodeObjectInstance">decodeObjectInstance(buffer, objectInstance)</a> ⇒ <code>object</code></dt>
 <dd><p>Decodes object instance from TLV buffer.</p>
 </dd>
-<dt><a href="#decodeObjectTLV">decodeObjectTLV(buffer, object)</a> ⇒ <code>object</code></dt>
-<dd><p>Encodes LwM2M object to TLV buffer.</p>
+<dt><a href="#decodeObject">decodeObject(buffer, object)</a> ⇒ <code>object</code></dt>
+<dd><p>Decodes LwM2M object to TLV buffer.</p>
 </dd>
 </dl>
 
@@ -119,7 +118,7 @@ This class represents endpoint (device).
     * [.getObjects()](#Endpoint+getObjects) ⇒ <code>Promise</code>
     * [.read(path, callback)](#Endpoint+read) ⇒ <code>Promise</code>
     * [.write(path, callback, tlvBuffer)](#Endpoint+write) ⇒ <code>Promise</code>
-    * [.execute(path, callback)](#Endpoint+execute) ⇒ <code>Promise</code>
+    * [.execute(path, callback, tlvBuffer)](#Endpoint+execute) ⇒ <code>Promise</code>
     * [.observe(path, callback)](#Endpoint+observe) ⇒ <code>Promise</code>
     * [.cancelObserve(path)](#Endpoint+cancelObserve) ⇒ <code>Promise</code>
 
@@ -209,7 +208,7 @@ endpoint.write(path, (status) => {
 ```
 <a name="Endpoint+execute"></a>
 
-### endpoint.execute(path, callback) ⇒ <code>Promise</code>
+### endpoint.execute(path, callback, tlvBuffer) ⇒ <code>Promise</code>
 Sends request to execute endpoint's resource.
 
 **Kind**: instance method of [<code>Endpoint</code>](#Endpoint)  
@@ -219,6 +218,7 @@ Sends request to execute endpoint's resource.
 | --- | --- | --- |
 | path | <code>string</code> | Resource path |
 | callback | <code>function</code> | Callback which will be called when async response is received |
+| tlvBuffer | <code>buffer</code> | Data in TLV format (optional) |
 
 **Example**  
 ```js
@@ -624,9 +624,9 @@ const resource = {
 const decodedValue = decodeResourceValue(buffer, resource);
 // decodedValue = 1
 ```
-<a name="encodeTLV"></a>
+<a name="encode"></a>
 
-## encodeTLV(object) ⇒ <code>object</code>
+## encode(object) ⇒ <code>object</code>
 Encodes ant type of instance (Object instance, multiple resources, resources instance, resource).
 
 **Kind**: global function  
@@ -651,9 +651,9 @@ const encoded = encode({
 });
 // encoded = <Buffer e1 16 da 01>
 ```
-<a name="encodeResourceInstanceTLV"></a>
+<a name="encodeResourceInstance"></a>
 
-## encodeResourceInstanceTLV(resourceInstance) ⇒ <code>object</code>
+## encodeResourceInstance(resourceInstance) ⇒ <code>object</code>
 Encodes resource instance to TLV buffer.
 
 **Kind**: global function  
@@ -697,9 +697,9 @@ const resources = {
 const encoded = encodeMultipleResources(resources);
 // encoded = <Buffer a6 16 da 41 00 01 41 01 00>
 ```
-<a name="encodeResourceTLV"></a>
+<a name="encodeResource"></a>
 
-## encodeResourceTLV(resource) ⇒ <code>object</code>
+## encodeResource(resource) ⇒ <code>object</code>
 Encodes resource to TLV buffer.
 
 **Kind**: global function  
@@ -720,9 +720,9 @@ const resource = {
 const encoded = encodeResourcez(resource);
 // encoded = <Buffer e1 16 da 01>
 ```
-<a name="encodeObjectInstanceTLV"></a>
+<a name="encodeObjectInstance"></a>
 
-## encodeObjectInstanceTLV(objectInstance) ⇒ <code>object</code>
+## encodeObjectInstance(objectInstance) ⇒ <code>object</code>
 Encodes LwM2M object instance to TLV buffer.
 
 **Kind**: global function  
@@ -748,9 +748,9 @@ const objectInstance = {
 const encoded = encodeObjectInstanceTLV(objectInstance);
 // encoded = <Buffer 07 00 e4 16 b7 44 79 ff 5c>
 ```
-<a name="encodeObjectTLV"></a>
+<a name="encodeObject"></a>
 
-## encodeObjectTLV(object) ⇒ <code>object</code>
+## encodeObject(object) ⇒ <code>object</code>
 Encodes LwM2M object to TLV buffer.
 
 **Kind**: global function  
@@ -779,9 +779,9 @@ const object = {
 const encoded = encodeObject(object);
 // encoded = <Buffer 07 00 e4 16 b7 44 79 ff 5c>
 ```
-<a name="decodeTLV"></a>
+<a name="decode"></a>
 
-## decodeTLV(buffer) ⇒ <code>object</code>
+## decode(buffer) ⇒ <code>object</code>
 Decodes any TLV buffer.
 
 **Kind**: global function  
@@ -798,9 +798,9 @@ const buffer = Buffer.from([0xe1, 0x16, 0xda, 0x01]);
 const decoded = TLV.decode(buffer);
 // decoded = { type: 3, identifier: 5850, value: <Buffer 01>, tlvSize: 4 }
 ```
-<a name="decodeResourceInstanceTLV"></a>
+<a name="decodeResourceInstance"></a>
 
-## decodeResourceInstanceTLV(buffer, resources) ⇒ <code>object</code>
+## decodeResourceInstance(buffer, resources) ⇒ <code>object</code>
 Decodes resource instance.
 
 **Kind**: global function  
@@ -846,9 +846,9 @@ const resourceInstance = {
 const decoded = decodeResourceInstance(buffer, resources);
 // decoded = 1
 ```
-<a name="decodeResourceTLV"></a>
+<a name="decodeResource"></a>
 
-## decodeResourceTLV(buffer, resource) ⇒ <code>object</code>
+## decodeResource(buffer, resource) ⇒ <code>object</code>
 Decodes resource.
 
 **Kind**: global function  
@@ -870,9 +870,9 @@ const resource = {
 const decoded = decodeResource(buffer, resource);
 // decoded = { identifier: 5850, type: 1, value: true, tlvSize: 4 }
 ```
-<a name="decodeObjectInstanceTLV"></a>
+<a name="decodeObjectInstance"></a>
 
-## decodeObjectInstanceTLV(buffer, objectInstance) ⇒ <code>object</code>
+## decodeObjectInstance(buffer, objectInstance) ⇒ <code>object</code>
 Decodes object instance from TLV buffer.
 
 **Kind**: global function  
@@ -899,10 +899,10 @@ const objectInstance: {
 const decoded = decodeObjectInstance(buffer, objectInstance);
 // decoded = { identifier: 0, resources: [ { identifier: 5815, type: 3 } ] }
 ```
-<a name="decodeObjectTLV"></a>
+<a name="decodeObject"></a>
 
-## decodeObjectTLV(buffer, object) ⇒ <code>object</code>
-Encodes LwM2M object to TLV buffer.
+## decodeObject(buffer, object) ⇒ <code>object</code>
+Decodes LwM2M object to TLV buffer.
 
 **Kind**: global function  
 **Returns**: <code>object</code> - object - Decoded object.  
