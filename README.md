@@ -118,7 +118,7 @@ This class represents endpoint (device).
     * [.getObjects()](#Endpoint+getObjects) ⇒ <code>Promise</code>
     * [.read(path, callback)](#Endpoint+read) ⇒ <code>Promise</code>
     * [.write(path, callback, tlvBuffer)](#Endpoint+write) ⇒ <code>Promise</code>
-    * [.execute(path, callback, tlvBuffer)](#Endpoint+execute) ⇒ <code>Promise</code>
+    * [.execute(path, callback)](#Endpoint+execute) ⇒ <code>Promise</code>
     * [.observe(path, callback)](#Endpoint+observe) ⇒ <code>Promise</code>
     * [.cancelObserve(path)](#Endpoint+cancelObserve) ⇒ <code>Promise</code>
 
@@ -208,7 +208,7 @@ endpoint.write(path, (status) => {
 ```
 <a name="Endpoint+execute"></a>
 
-### endpoint.execute(path, callback, tlvBuffer) ⇒ <code>Promise</code>
+### endpoint.execute(path, callback) ⇒ <code>Promise</code>
 Sends request to execute endpoint's resource.
 
 **Kind**: instance method of [<code>Endpoint</code>](#Endpoint)  
@@ -218,7 +218,6 @@ Sends request to execute endpoint's resource.
 | --- | --- | --- |
 | path | <code>string</code> | Resource path |
 | callback | <code>function</code> | Callback which will be called when async response is received |
-| tlvBuffer | <code>buffer</code> | Data in TLV format (optional) |
 
 **Example**  
 ```js
