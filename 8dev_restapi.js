@@ -8,6 +8,11 @@ const ip = require('ip');
 
 /**
  * This class represents endpoint (device).
+   * @example
+   * const restAPI = require('restserver-api');
+   *
+   * const service = new restAPI.Service(serviceOptions);
+   * const endpoint = new restAPI.Endpoint(service, 'endpointId');
  */
 class Endpoint extends EventEmitter {
   /**
@@ -142,9 +147,9 @@ class Endpoint extends EventEmitter {
    *   // err - exception object or status code
    * });
    */
-  write(path, callback, tlvBuffer) {
+  write(path, callback, tlvBuffer, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
-      this.service.put(`/endpoints/${this.id}${path}`, tlvBuffer).then((dataAndResponse) => {
+      this.service.put(`/endpoints/${this.id}${path}`, tlvBuffer, type).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 202) {
           const id = dataAndResponse.data['async-response-id'];
           this.addAsyncCallback(id, callback);
@@ -162,6 +167,7 @@ class Endpoint extends EventEmitter {
    * Sends request to execute endpoint's resource.
    * @param {string} path - Resource path
    * @param {function} callback - Callback which will be called when async response is received
+   * @param {buffer} tlvBuffer - Data in TLV format (optional)
    * @returns {Promise} Promise with async response id
    * @example
    * endpoint.execute(path, (status) => {
@@ -172,9 +178,9 @@ class Endpoint extends EventEmitter {
    *   // err - exception object or status code
    * });
    */
-  execute(path, callback) {
+  execute(path, callback, tlvBuffer, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
-      this.service.post(`/endpoints/${this.id}${path}`).then((dataAndResponse) => {
+      this.service.post(`/endpoints/${this.id}${path}`, tlvBuffer, type).then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 202) {
           const id = dataAndResponse.data['async-response-id'];
           this.addAsyncCallback(id, callback);
