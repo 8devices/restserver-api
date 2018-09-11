@@ -8,11 +8,6 @@ const ip = require('ip');
 
 /**
  * This class represents endpoint (device).
-   * @example
-   * const restAPI = require('restserver-api');
-   *
-   * const service = new restAPI.Service(serviceOptions);
-   * const endpoint = new restAPI.Endpoint(service, 'endpointId');
  */
 class Endpoint extends EventEmitter {
   /**
@@ -137,6 +132,7 @@ class Endpoint extends EventEmitter {
    * @param {string} path - Resource path
    * @param {function} callback - Callback which will be called when async response is received
    * @param {buffer} tlvBuffer - Data in TLV format
+   * @param {string} type - Content type
    * @returns {Promise} Promise with async response id
    * @example
    * endpoint.write(path, (status) => {
@@ -168,6 +164,7 @@ class Endpoint extends EventEmitter {
    * @param {string} path - Resource path
    * @param {function} callback - Callback which will be called when async response is received
    * @param {buffer} tlvBuffer - Data in TLV format (optional)
+   * @param {string} type - Content type
    * @returns {Promise} Promise with async response id
    * @example
    * endpoint.execute(path, (status) => {

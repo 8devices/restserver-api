@@ -23,8 +23,8 @@ This class represents endpoint (device).
     * [new Endpoint(service, id)](#new_Endpoint_new)
     * [.getObjects()](#Endpoint+getObjects) ⇒ <code>Promise</code>
     * [.read(path, callback)](#Endpoint+read) ⇒ <code>Promise</code>
-    * [.write(path, callback, tlvBuffer)](#Endpoint+write) ⇒ <code>Promise</code>
-    * [.execute(path, callback)](#Endpoint+execute) ⇒ <code>Promise</code>
+    * [.write(path, callback, tlvBuffer, type)](#Endpoint+write) ⇒ <code>Promise</code>
+    * [.execute(path, callback, tlvBuffer, type)](#Endpoint+execute) ⇒ <code>Promise</code>
     * [.observe(path, callback)](#Endpoint+observe) ⇒ <code>Promise</code>
     * [.cancelObserve(path)](#Endpoint+cancelObserve) ⇒ <code>Promise</code>
 
@@ -83,17 +83,18 @@ endpoint.read(path, (status, payload) => {
 ```
 <a name="Endpoint+write"></a>
 
-### endpoint.write(path, callback, tlvBuffer) ⇒ <code>Promise</code>
+### endpoint.write(path, callback, tlvBuffer, type) ⇒ <code>Promise</code>
 Sends request to write a value into endpoint's resource.
 
 **Kind**: instance method of [<code>Endpoint</code>](#Endpoint)  
 **Returns**: <code>Promise</code> - Promise with async response id  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| path | <code>string</code> | Resource path |
-| callback | <code>function</code> | Callback which will be called when async response is received |
-| tlvBuffer | <code>buffer</code> | Data in TLV format |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| path | <code>string</code> |  | Resource path |
+| callback | <code>function</code> |  | Callback which will be called when async response is received |
+| tlvBuffer | <code>buffer</code> |  | Data in TLV format |
+| type | <code>string</code> | <code>&quot;application/vnd.oma.lwm2m+tlv&quot;</code> | Content type |
 
 **Example**  
 ```js
@@ -107,16 +108,18 @@ endpoint.write(path, (status) => {
 ```
 <a name="Endpoint+execute"></a>
 
-### endpoint.execute(path, callback) ⇒ <code>Promise</code>
+### endpoint.execute(path, callback, tlvBuffer, type) ⇒ <code>Promise</code>
 Sends request to execute endpoint's resource.
 
 **Kind**: instance method of [<code>Endpoint</code>](#Endpoint)  
 **Returns**: <code>Promise</code> - Promise with async response id  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| path | <code>string</code> | Resource path |
-| callback | <code>function</code> | Callback which will be called when async response is received |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| path | <code>string</code> |  | Resource path |
+| callback | <code>function</code> |  | Callback which will be called when async response is received |
+| tlvBuffer | <code>buffer</code> |  | Data in TLV format (optional) |
+| type | <code>string</code> | <code>&quot;application/vnd.oma.lwm2m+tlv&quot;</code> | Content type |
 
 **Example**  
 ```js
@@ -449,4 +452,5 @@ Performs POST requests with given path, data and data type.
 | path | <code>string</code> |  | Request path |
 | argument | <code>object</code> |  | Data which will be sent (optional) |
 | type | <code>string</code> | <code>&quot;application/vnd.oma.lwm2m+tlv&quot;</code> | Data type (optional) |
+
 
