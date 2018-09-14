@@ -687,23 +687,16 @@ class Service extends EventEmitter {
   put(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
       const url = this.config.host + path;
-      let args;
+      const args = {};
+      args.headers = {};
 
       if (argument !== undefined) {
-        args = {
-          headers: { 'Content-Type': type },
-          data: argument,
-        };
+        args.headers['Content-Type'] = type;
+        args.data = argument;
       }
 
       if (this.config.authentication) {
-        if (args === undefined) {
-          args = {
-            headers: { Authorization: `Bearer ${this.authenticationToken}` },
-          };
-        } else {
-          args.headers.Authorization = `Bearer ${this.authenticationToken}`;
-        }
+        args.headers.Authorization = `Bearer ${this.authenticationToken}`;
       }
       const putRequest = this.client.put(url, args, (data, resp) => {
         const dataAndResponse = {};
@@ -752,23 +745,16 @@ class Service extends EventEmitter {
   post(path, argument, type = 'application/vnd.oma.lwm2m+tlv') {
     return new Promise((fulfill, reject) => {
       const url = this.config.host + path;
-      let args;
+      const args = {};
+      args.headers = {};
 
       if (argument !== undefined) {
-        args = {
-          headers: { 'Content-Type': type },
-          data: argument,
-        };
+        args.headers['Content-Type'] = type;
+        args.data = argument;
       }
 
       if (this.config.authentication) {
-        if (args === undefined) {
-          args = {
-            headers: { Authorization: `Bearer ${this.authenticationToken}` },
-          };
-        } else {
-          args.headers.Authorization = `Bearer ${this.authenticationToken}`;
-        }
+        args.headers.Authorization = `Bearer ${this.authenticationToken}`;
       }
       const postRequest = this.client.post(url, args, (data, resp) => {
         const dataAndResponse = {};
