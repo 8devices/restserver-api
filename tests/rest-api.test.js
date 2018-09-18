@@ -521,6 +521,17 @@ describe('Rest API interface', () => {
         });
       });
 
+      it('should return rejected promise if registered callback does not match service configuration', (done) => {
+        nock(url)
+          .get('/notification/callback')
+          .reply(200, response.badNotificationCallback);
+        service.checkNotificationCallback()
+          .catch((err) => {
+            expect(typeof err).to.equal('object');
+            done();
+          });
+      });
+
       it('should return rejected promise with exception object if connection is not succesfull', (done) => {
         service.checkNotificationCallback()
           .catch((err) => {
