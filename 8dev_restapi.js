@@ -552,9 +552,6 @@ class Service extends EventEmitter {
     return new Promise((fulfill, reject) => {
       this.get('/notification/callback').then((dataAndResponse) => {
         if (dataAndResponse.resp.statusCode === 200) {
-          console.log(dataAndResponse.data.url);
-          console.log(`http://${this.ipAddress}:${this.config.port}/notification`);
-
           if (dataAndResponse.data.url === `http://${this.ipAddress}:${this.config.port}/notification`) {
             fulfill(dataAndResponse.data);
           } else {
