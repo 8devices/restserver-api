@@ -527,7 +527,7 @@ describe('Rest API interface', () => {
           .reply(200, response.badNotificationCallback);
         service.checkNotificationCallback()
           .catch((err) => {
-            expect(typeof err).to.equal('object');
+            expect(err.code).to.equal('incorrectIpAdress');
             done();
           });
       });
@@ -535,7 +535,7 @@ describe('Rest API interface', () => {
       it('should return rejected promise with exception object if connection is not succesfull', (done) => {
         service.checkNotificationCallback()
           .catch((err) => {
-            expect(typeof err).to.equal('object');
+            expect(err.code).to.equal('ECONNREFUSED');
             done();
           });
       });
