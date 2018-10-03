@@ -555,7 +555,7 @@ class Service extends EventEmitter {
           if (dataAndResponse.data.url === `http://${this.ipAddress}:${this.config.port}/notification`) {
             fulfill(dataAndResponse.data);
           } else {
-            const err = new Error('Notifcation callback does not match current configuration');
+            const err = new Error('Notification callback does not match current configuration');
             err.code = 'EINVALIDCALLBACK';
             reject(err);
           }
