@@ -536,6 +536,7 @@ describe('Rest API interface', () => {
       it('should return rejected promise with exception object if connection is not succesfull', (done) => {
         service.checkNotificationCallback()
           .catch((err) => {
+            expect(err instanceof Error).to.equal(true);
             expect(err.code).to.equal('ECONNREFUSED');
             done();
           });
