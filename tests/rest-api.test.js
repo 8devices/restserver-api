@@ -527,7 +527,9 @@ describe('Rest API interface', () => {
           .reply(200, response.badNotificationCallback);
         service.checkNotificationCallback()
           .catch((err) => {
-            expect(err.code).to.equal('incorrectIpAdress');
+            expect(typeof err).to.equal('object');
+            expect(err instanceof Error).to.equal(true);
+            expect(err.code).to.equal('EINVALIDCALLBACK');
             done();
           });
       });
