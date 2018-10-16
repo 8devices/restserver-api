@@ -12,7 +12,7 @@ const ip = require('ip');
    * const restAPI = require('restserver-api');
    *
    * const service = new restAPI.Service(serviceOptions);
-   * const device = new restAPI.Endpoint(service, 'deviceId');
+   * const device = new restAPI.Device(service, 'deviceId');
  */
 class Device extends EventEmitter {
   /**

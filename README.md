@@ -37,7 +37,7 @@ service.start().then(() => {
 
 <dl>
 <dt><a href="#Device">Device</a></dt>
-<dd><p>This class represents device.</p>
+<dd><p>This class represents device (endpoint).</p>
 </dd>
 <dt><a href="#Service">Service</a></dt>
 <dd><p>This class represents REST API service.</p>
@@ -109,7 +109,7 @@ MULTIPLE_RESOURCE, RESOURCE_INSTANCE, RESOURCE).</p>
 <a name="Device"></a>
 
 ## Device
-This class represents device.
+This class represents device (endpoint).
 
 **Kind**: global class  
 
@@ -141,7 +141,7 @@ responses" and emits "register", "update", "deregister" events.
 const restAPI = require('restserver-api');
 
 const service = new restAPI.Service(serviceOptions);
-const device = new restAPI.Endpoint(service, 'deviceId');
+const device = new restAPI.Device(service, 'deviceId');
 ```
 <a name="Device+getObjects"></a>
 
@@ -292,7 +292,7 @@ This class represents REST API service.
     * [.deleteNotificationCallback()](#Service+deleteNotificationCallback) ⇒ <code>Promise</code>
     * [.checkNotificationCallback()](#Service+checkNotificationCallback) ⇒ <code>Promise</code>
     * [.pullNotification()](#Service+pullNotification) ⇒ <code>Promise</code>
-    * [.getEndpoints()](#Service+getEndpoints) ⇒ <code>Promise</code>
+    * [.getDevices()](#Service+getDevices) ⇒ <code>Promise</code>
     * [.getVersion()](#Service+getVersion) ⇒ <code>Promise</code>
     * [.get(path)](#Service+get) ⇒ <code>Promise</code>
     * [.put(path, argument, type)](#Service+put) ⇒ <code>Promise</code>
@@ -463,16 +463,16 @@ service.pullNotification().then((resp) => {
   // err - exception object
 });
 ```
-<a name="Service+getEndpoints"></a>
+<a name="Service+getDevices"></a>
 
-### service.getEndpoints() ⇒ <code>Promise</code>
+### service.getDevices() ⇒ <code>Promise</code>
 Sends request to get all registered endpoints.
 
 **Kind**: instance method of [<code>Service</code>](#Service)  
 **Returns**: <code>Promise</code> - Promise with a list of endpoints  
 **Example**  
 ```js
-service.getEndpoints().then((resp) => {
+service.getDevices().then((resp) => {
   // resp = [ { name: 'uuid-4567', type: '8dev_3700', ... }, ... ]
 }).catch((err) => {
   // err - exception message object or status code
