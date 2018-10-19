@@ -293,7 +293,9 @@ class Service extends EventEmitter {
     };
     this.authenticationToken = '';
     this.tokenValidation = 3600;
-    this.configure(opts);
+    if (opts !== undefined) {
+      this.configure(opts);
+    }
     this.ipAddress = ip.address();
     this.configureNodeRestClient();
     this.addTlvSerializer();
@@ -308,11 +310,9 @@ class Service extends EventEmitter {
    * @return {void}
    */
   configure(opts) {
-    if (typeof opts === 'object') {
-      Object.keys(opts).forEach((opt) => {
-        this.config[opt] = opts[opt];
-      });
-    }
+    Object.keys(opts).forEach((opt) => {
+      this.config[opt] = opts[opt];
+    });
   }
 
   /**
