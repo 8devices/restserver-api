@@ -308,9 +308,11 @@ class Service extends EventEmitter {
    * @return {void}
    */
   configure(opts) {
-    Object.keys(opts).forEach((opt) => {
-      this.config[opt] = opts[opt];
-    });
+    if (typeof opts === 'object') {
+      Object.keys(opts).forEach((opt) => {
+        this.config[opt] = opts[opt];
+      });
+    }
   }
 
   /**
