@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/8devices/restserver-api#readme",
   "dependencies": {
-    "coap": "^0.21.0",
+    "coap": "git+https://github.com/GiedriusM/node-coap.git#pr-server-custom-socket",
     "node-rest-client": "^3.1.0"
   },
   "devDependencies": {

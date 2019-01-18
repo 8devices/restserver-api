@@ -41,7 +41,7 @@ function Interval(callback, delay) {
 }
 
 class ClientNodeInstance extends EventEmitter {
-  constructor(lifetime, manufacturer, model, queueMode, endpointClientName, serverURI, clientPort) {
+  constructor(lifetime, manufacturer, model, queueMode, endpointClientName, serverURI, clientPort, serverPort) {
     super();
 
     this._state = 'stopped';
@@ -57,10 +57,10 @@ class ClientNodeInstance extends EventEmitter {
       this.requestListener(req, res);
     });
     this.coapServer.listen(clientPort);
-    this.coapAgent = new coap.Agent({ type: 'udp6', socket: this.coapServer._sock });
+    this.coapAgent = clientPort;
     this.requestOptions = {
       host: serverURI,
-      port: 5555,
+      port: serverPort,
       method: 'POST',
       confirmable: 'true',
       agent: this.coapAgent,
