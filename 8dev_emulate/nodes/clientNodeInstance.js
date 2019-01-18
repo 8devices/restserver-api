@@ -67,6 +67,9 @@ class ClientNodeInstance extends EventEmitter {
         socket: this.client,
       });
       this.coapServer.listen(this.coapAgent);
+      this.client.on('handshake', () => {
+        this.emit('handshake');
+      });
     } else {
       this.coapServer.listen(options.clientPort);
       this.coapAgent = new coap.Agent({
