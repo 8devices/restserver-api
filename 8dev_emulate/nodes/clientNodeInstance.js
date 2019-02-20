@@ -58,7 +58,7 @@ class ClientNodeInstance extends EventEmitter {
       this.requestListener(req, res);
     });
     if (options.cacert) {
-      this.client = new mbedtls.Socket();
+      this.client = new mbedtls.Connection(options);
       this.client.ssl_config.ca_chain(options.cacert, null);
       this.client.ssl_config.own_cert(options.cacert, options.pk_key);
       this.client.ssl_config.authmode(options.authmode);
