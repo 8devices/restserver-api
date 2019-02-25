@@ -120,7 +120,6 @@ class ClientNodeInstance extends EventEmitter {
     this.coapServer = coap.createServer({ type: 'udp6' }, (req, res) => {
       this.requestListener(req, res);
     });
-<<<<<<< HEAD
 
     if (!options.ciphersuites) {
       this.coapServer.listen(options.clientPort);
@@ -155,13 +154,6 @@ class ClientNodeInstance extends EventEmitter {
       });
     }
 
-=======
-    this.coapServer.listen(clientPort);
-    this.coapAgent = new coap.Agent({
-      type: 'udp6',
-      socket: this.coapServer._sock, // eslint-disable-line no-underscore-dangle
-    });
->>>>>>> master
     this.requestOptions = {
       host: options.serverURI,
       port: options.serverPort,
