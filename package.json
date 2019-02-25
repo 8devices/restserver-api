@@ -1,6 +1,6 @@
 {
   "name": "restserver-api",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "8devices sensor network REST server API and demo",
   "main": "index.js",
   "scripts": {
@@ -11,13 +11,16 @@
     "url": "git+https://github.com/8devices/restserver-api.git"
   },
   "author": "Giedrius Medzevicius <giedrius@8devices.com>",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/8devices/restserver-api/issues"
   },
   "homepage": "https://github.com/8devices/restserver-api#readme",
   "dependencies": {
     "coap": "git+https://github.com/mcollina/node-coap.git#v0.23.0",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "ip": "^1.1.5",
     "node-rest-client": "^3.1.0"
   },
   "devDependencies": {
@@ -28,6 +31,10 @@
     "mocha": "^5.0.4",
     "nock": "^9.2.3",
     "istanbul": "^0.4.5",
-    "codecov": "^3.0.0"
+    "codecov": "^3.0.0",
+    "jsdoc-to-markdown": "^4.0.1"
+  },
+  "directories": {
+    "test": "tests"
   }
 }
