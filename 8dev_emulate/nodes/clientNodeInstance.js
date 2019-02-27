@@ -3,7 +3,6 @@ const EventEmitter = require('events');
 const { ObjectInstance } = require('./objectInstance.js');
 const { Resource } = require('./resourceInstance.js');
 const { TLV } = require('../../lwm2m/index.js');
-const mbedtls = require('node-mbedtls');
 
 const { getDictionaryByValue } = TLV;
 const LWM2M_VERSION = '1.0';
@@ -120,39 +119,18 @@ class ClientNodeInstance extends EventEmitter {
     this.coapServer = coap.createServer({ type: 'udp6' }, (req, res) => {
       this.requestListener(req, res);
     });
+    this.coapServer.listen(options.clientPort);
+    this.coapAgent = new coap.Agent({
+      type: 'udp6',
+      socket: this.coapServer._sock, // eslint-disable-line no-underscore-dangle
+    });
 
-    if (!options.ciphersuites) {
-      this.coapServer.listen(options.clientPort);
-      this.coapAgent = new coap.Agent({
-        type: 'udp6',
-        socket: this.coapServer._sock,
-      });
-    } else if (options.ciphersuites[0] == 0xC0AE || options.ciphersuites[0] == 0xC023) {
-      this.client = new mbedtls.Connection(options);
-      this.client.ssl_config.ca_chain(options.cacert, null);
-      this.client.ssl_config.own_cert(options.cacert, options.pk_key);
-      this.client.ssl_config.authmode(options.authmode);
-      this.client.ssl_config.ciphersuites(options.ciphersuites);
-      this.coapAgent = new coap.Agent({
-        socket: this.client,
-      });
-      this.coapServer.listen(this.coapAgent);
-      this.client.on('handshake', () => {
-        this.emit('handshake');
-      });
-    } else if (options.ciphersuites[0] == 0xC0A8 || options.ciphersuites[0] == 0x00AF) {
-      this.client = new mbedtls.Connection(options);
-      this.client.ssl_config.psk(options.pskIdentity, options.psk);
-      this.client.ssl_config.psk(options.psk, options.pskIdentity);
-      this.client.ssl_config.ciphersuites(options.ciphersuites);
-      this.coapAgent = new coap.Agent({
-        socket: this.client,
-      });
-      this.coapServer.listen(this.coapAgent);
-      this.client.on('handshake', () => {
-        this.emit('handshake');
-      });
-    }
+    this.coapAgent.on('error', (error) => {
+      this.emit('error', error);
+    });
+    this.coapServer.on('error', (error) => {
+      this.emit('error', error);
+    });
 
     this.requestOptions = {
       host: options.serverURI,
@@ -817,6 +795,7 @@ class ClientNodeInstance extends EventEmitter {
           break;
         }
         case 'registered': {
+          this.emit('registered');
           break;
         }
         default: {
