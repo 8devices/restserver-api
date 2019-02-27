@@ -35,8 +35,8 @@ function humiditySensorHandler(averageHumidity = 70, fluctuation = 0.05) {
 
 
 class Sensor3700 extends ClientNode {
-  constructor(lifetime, UUID, serverIP, clientPort) {
-    super(lifetime, '8devices', '8dev_3700', true, UUID, serverIP, clientPort);
+  constructor(options) {
+    super(options);
 
 
     this.timeInitialisation = new Date().getTime();
@@ -86,8 +86,8 @@ class Sensor3700 extends ClientNode {
 }
 
 class Sensor3800 extends ClientNode {
-  constructor(lifetime, UUID, serverIP, clientPort) {
-    super(lifetime, '8devices', '8dev_3800', true, UUID, serverIP, clientPort);
+  constructor(options) {
+    super(options);
 
     this.createObject(3303, 0);
     this.createObject(3304, 0);
@@ -99,8 +99,8 @@ class Sensor3800 extends ClientNode {
 }
 
 class Sensor4400 extends ClientNode {
-  constructor(lifetime, UUID, serverIP, clientPort) {
-    super(lifetime, '8devices', '8dev_4400', true, UUID, serverIP, clientPort);
+  constructor(options) {
+    super(options);
 
     this.createObject(3200, 0);
     this.createObject(3303, 0);
@@ -129,8 +129,8 @@ class Sensor4400 extends ClientNode {
 }
 
 class Sensor4500 extends ClientNode {
-  constructor(lifetime, UUID, serverIP, clientPort) {
-    super(lifetime, '8devices', '8dev_4500', true, UUID, serverIP, clientPort);
+  constructor(options) {
+    super(options);
 
     this.createObject(3202, 0);
 

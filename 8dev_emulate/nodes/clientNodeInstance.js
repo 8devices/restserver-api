@@ -41,7 +41,7 @@ function Interval(callback, delay) {
 }
 
 class ClientNodeInstance extends EventEmitter {
-  constructor(lifetime, manufacturer, model, queueMode, endpointClientName, serverURI, clientPort) {
+  constructor(options) {
     super();
 
     this._state = 'stopped';
@@ -49,18 +49,26 @@ class ClientNodeInstance extends EventEmitter {
     this.updatesIterator = {};
     this.observedResources = {};
     this.registrationPath = '/rd';
-    this.listeningPort = clientPort;
+    this.listeningPort = options.clientPort;
     this.updatesInterval = 10; // updates interval in seconds
-    this.endpointClientName = endpointClientName;
+    this.endpointClientName = options.endpointClientName;
 
     this.coapServer = coap.createServer({ type: 'udp6' }, (req, res) => {
       this.requestListener(req, res);
     });
-    this.coapServer.listen(clientPort);
+    this.coapServer.listen(options.clientPort);
     this.coapAgent = new coap.Agent({ type: 'udp6', socket: this.coapServer._sock });
+
+    this.coapAgent.on('error', (error) => {
+      this.emit('error', error);
+    });
+    this.coapServer.on('error', (error) => {
+      this.emit('error', error);
+    });
+
     this.requestOptions = {
-      host: serverURI,
-      port: 5555,
+      host: options.serverURI,
+      port: options.serverPort,
       method: 'POST',
       confirmable: 'true',
       agent: this.coapAgent,
@@ -68,10 +76,10 @@ class ClientNodeInstance extends EventEmitter {
 
     this.stateListener();
 
-    this.initiateSecurityObject(serverURI);
-    this.initiateServerObject(lifetime, queueMode);
+    this.initiateSecurityObject(options.serverURI);
+    this.initiateServerObject(options.lifetime, options.queueMode);
     this.initiateAccessControlObject();
-    this.initiateDeviceObject(manufacturer, model, queueMode);
+    this.initiateDeviceObject(options.manufacturer, options.model, options.queueMode);
     this.initiateConnectivityMonitoringObject();
     this.initiateFirmwareObject();
     this.initiateLocationObject();
@@ -532,6 +540,7 @@ class ClientNodeInstance extends EventEmitter {
           break;
         }
         case 'registered': {
+          this.emit('registered');
           break;
         }
         default: {
