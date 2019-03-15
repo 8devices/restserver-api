@@ -586,6 +586,8 @@ class ClientNodeInstance extends EventEmitter {
             }, this.objects['1/0'].resources['1'].value);
         }
       });
+    }).catch((error) => {
+      this.emit('error', error);
     });
   }
 
