@@ -554,8 +554,8 @@ class ClientNodeInstance extends EventEmitter {
     return new Promise((started, failed) => {
       this.register(registrationPath)
       .then((updatesPath) => {
-        this.on('deregister', () => {
-          this.deregistrationHandler(updatesPath);
+        this.once('deregister', () => {
+          this.deregistrationHandler(updatesPath).catch((err) => { });
         });
 
         this.on('update-failed', (reason) => {
