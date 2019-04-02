@@ -34,8 +34,8 @@ function humiditySensorHandle(averageHumidity = 70, fluctuation = 0.05) {
 }
 
 class Sensor3700 extends ClientNode {
-  constructor(lifetime, UUID, serverIP, clientPort) {
-    super(lifetime, '8devices', '8dev_3700', true, UUID, serverIP, clientPort);
+  constructor(options) {
+    super(options);
 
     this.initialisePowerSourceVoltageResource();
     this.initialisePowerMeasurementObject();
@@ -138,8 +138,8 @@ class Sensor3700 extends ClientNode {
 }
 
 class Sensor3800 extends ClientNode {
-  constructor(lifetime, UUID, serverIP, clientPort) {
-    super(lifetime, '8devices', '8dev_3800', true, UUID, serverIP, clientPort);
+  constructor(options) {
+    super(options);
 
     this.initialisePowerSourceVoltageResource();
     this.initialiseTemperatureSensorObject();
@@ -184,8 +184,8 @@ class Sensor3800 extends ClientNode {
 }
 
 class Sensor4400 extends ClientNode {
-  constructor(lifetime, UUID, serverIP, clientPort) {
-    super(lifetime, '8devices', '8dev_4400', true, UUID, serverIP, clientPort);
+  constructor(options) {
+    super(options);
 
     this.initialisePowerSourceVoltageResource();
     this.initialiseDigitalInputObject();
@@ -251,8 +251,8 @@ class Sensor4400 extends ClientNode {
 }
 
 class Sensor4500 extends ClientNode {
-  constructor(lifetime, UUID, serverIP, clientPort) {
-    super(lifetime, '8devices', '8dev_4500', true, UUID, serverIP, clientPort);
+  constructor(options) {
+    super(options);
 
     this.initialisePowerSourceVoltageResource();
     this.initialiseAnalogueInputOjbect();
